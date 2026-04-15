@@ -7,6 +7,7 @@ import About from './pages/About.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Profile from './pages/Profile.jsx'
+import NotFound from './pages/NotFound.jsx'
 
 export default function App() {
   return (
@@ -26,7 +27,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Landing />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

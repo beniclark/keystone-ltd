@@ -1,10 +1,12 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Sun, Moon } from 'lucide-react'
 import Logo from './Logo.jsx'
 import Button from './Button.jsx'
 import { useAuth } from '../hooks/useAuth.js'
 import { logout } from '../lib/auth.js'
+import { useThemeContext } from '../hooks/useThemeContext.js'
+import { useToast } from '../hooks/useToast.js'
 
 const navItems = [
   { to: '/services', label: 'Services' },
@@ -15,6 +17,8 @@ export default function Navbar() {
   const { isAuthenticated, user } = useAuth()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const { isDark, toggleTheme } = useThemeContext()
+  const toast = useToast()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -26,15 +30,27 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout()
+    toast.info('Logged out successfully')
     setOpen(false)
     navigate('/')
   }
+
+  const themeButton = (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-secondary)] transition-colors"
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {isDark ? <Sun size={16} /> : <Moon size={16} />}
+    </button>
+  )
 
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-white/90 backdrop-blur-md border-b border-slate-200/70'
+          ? 'bg-[var(--color-surface-primary)]/90 backdrop-blur-md border-b border-[var(--color-border-primary)]'
           : 'bg-transparent border-b border-transparent'
       }`}
     >
@@ -51,8 +67,8 @@ export default function Navbar() {
               className={({ isActive }) =>
                 `px-4 py-2 text-sm font-medium rounded-full transition-colors ${
                   isActive
-                    ? 'text-navy-800 bg-navy-50'
-                    : 'text-slate-600 hover:text-navy-800 hover:bg-navy-50'
+                    ? 'text-[var(--color-text-primary)] bg-[var(--color-surface-secondary)]'
+                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-secondary)]'
                 }`
               }
             >
@@ -62,11 +78,10 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-2">
+          {themeButton}
           {isAuthenticated ? (
             <>
-              <span className="text-sm text-slate-500 mr-2">
-                Hi, {user?.firstName}
-              </span>
+              <span className="text-sm text-[var(--color-text-muted)] mr-2">Hi, {user?.firstName}</span>
               <Button to="/profile" variant="ghost" size="sm">
                 Profile
               </Button>
@@ -88,28 +103,29 @@ export default function Navbar() {
 
         <button
           type="button"
-          className="md:hidden p-2 text-navy-800"
+          className="md:hidden p-2 text-[var(--color-text-primary)]"
           onClick={() => setOpen((o) => !o)}
-          aria-label="Toggle menu"
+          aria-label="Toggle navigation menu"
         >
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
       {open && (
-        <div className="md:hidden bg-white border-t border-slate-200">
+        <div className="md:hidden bg-[var(--color-surface-primary)] border-t border-[var(--color-border-primary)]">
           <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-2">
+            <div className="pb-2">{themeButton}</div>
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 onClick={() => setOpen(false)}
-                className="px-3 py-2 text-base font-medium text-slate-700 rounded-lg hover:bg-navy-50"
+                className="px-3 py-2 text-base font-medium text-[var(--color-text-secondary)] rounded-lg hover:bg-[var(--color-surface-secondary)]"
               >
                 {item.label}
               </NavLink>
             ))}
-            <div className="h-px bg-slate-200 my-2" />
+            <div className="h-px bg-[var(--color-border-primary)] my-2" />
             {isAuthenticated ? (
               <>
                 <Button to="/profile" variant="outline" size="md" onClick={() => setOpen(false)}>

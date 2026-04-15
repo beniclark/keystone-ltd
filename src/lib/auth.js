@@ -1,45 +1,52 @@
-const KEY = 'keystoneUser'
+import { api } from './api.js'
 
-export const defaultMockUser = {
-  firstName: 'Alex',
-  lastName: 'Morgan',
-  email: 'alex.morgan@example.com',
-  memberSince: '2019',
-}
+const USER_KEY = 'keystoneUser'
+const TOKEN_KEY = 'keystoneToken'
 
-export function login(email) {
-  const user = { ...defaultMockUser, email: email || defaultMockUser.email }
-  localStorage.setItem(KEY, JSON.stringify(user))
+function persistAuth(token, user) {
+  localStorage.setItem(TOKEN_KEY, token)
+  localStorage.setItem(USER_KEY, JSON.stringify(user))
   window.dispatchEvent(new Event('keystone-auth'))
   return user
 }
 
-export function signup(firstName, lastName, email) {
-  const user = {
-    ...defaultMockUser,
-    firstName: firstName || defaultMockUser.firstName,
-    lastName: lastName || defaultMockUser.lastName,
-    email: email || defaultMockUser.email,
-  }
-  localStorage.setItem(KEY, JSON.stringify(user))
-  window.dispatchEvent(new Event('keystone-auth'))
-  return user
+export async function login(email, password) {
+  const response = await api.post('/auth/login', { email, password })
+  return persistAuth(response.token, response.user)
+}
+
+export async function signup(firstName, lastName, email, password) {
+  const response = await api.post('/auth/signup', { firstName, lastName, email, password })
+  return persistAuth(response.token, response.user)
 }
 
 export function logout() {
-  localStorage.removeItem(KEY)
+  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(USER_KEY)
   window.dispatchEvent(new Event('keystone-auth'))
 }
 
 export function getCurrentUser() {
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(USER_KEY)
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
   }
 }
 
-export function isAuthenticated() {
-  return !!getCurrentUser()
+export async function validateSession() {
+  const token = localStorage.getItem(TOKEN_KEY)
+  if (!token) {
+    return null
+  }
+
+  try {
+    const response = await api.get('/auth/me')
+    localStorage.setItem(USER_KEY, JSON.stringify(response.user))
+    return response.user
+  } catch {
+    logout()
+    return null
+  }
 }

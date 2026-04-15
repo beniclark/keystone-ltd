@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 import {
   TrendingUp,
   Target,
@@ -74,13 +74,13 @@ export default function Services() {
       </section>
 
       {/* SERVICE DEEP-DIVES */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-[var(--color-surface-primary)]">
         <div className="max-w-7xl mx-auto px-6 space-y-24">
           {services.map((svc, i) => {
             const Icon = iconMap[svc.icon] || TrendingUp
             const reverse = i % 2 === 1
             return (
-              <motion.div
+              <Motion.div
                 key={svc.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -91,13 +91,13 @@ export default function Services() {
                 }`}
               >
                 <div className="md:col-span-7">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-navy-50 text-navy-800 mb-5">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-navy-50 text-[var(--color-text-primary)] mb-5">
                     <Icon size={22} />
                   </div>
-                  <h2 className="font-display text-4xl md:text-5xl font-semibold text-navy-800 tracking-tight">
+                  <h2 className="font-display text-4xl md:text-5xl font-semibold text-[var(--color-text-primary)] tracking-tight">
                     {svc.title}
                   </h2>
-                  <p className="mt-5 text-lg text-slate-600 leading-relaxed max-w-xl">
+                  <p className="mt-5 text-lg text-[var(--color-text-secondary)] leading-relaxed max-w-xl">
                     {svc.description}
                   </p>
                   <ul className="mt-8 space-y-3">
@@ -117,29 +117,29 @@ export default function Services() {
                   </div>
                 </div>
                 <div className="md:col-span-5">
-                  <div className="relative aspect-[4/3] rounded-3xl bg-gradient-to-br from-navy-50 via-navy-100 to-white border border-slate-200 p-8 overflow-hidden">
+                  <div className="relative aspect-[4/3] rounded-3xl bg-gradient-to-br from-navy-50 via-navy-100 to-white border border-[var(--color-border-primary)] p-8 overflow-hidden">
                     <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-[#10b981]/15 blur-3xl" />
                     <div className="relative h-full flex flex-col justify-between">
-                      <Icon size={56} className="text-navy-800/80" strokeWidth={1.4} />
+                      <Icon size={56} className="text-[var(--color-text-primary)]/80" strokeWidth={1.4} />
                       <div>
                         <div className="text-xs uppercase tracking-[0.14em] text-navy-500/70">
                           Included
                         </div>
-                        <div className="font-display text-2xl font-semibold text-navy-800 mt-2 leading-snug">
+                        <div className="font-display text-2xl font-semibold text-[var(--color-text-primary)] mt-2 leading-snug">
                           {svc.bullets[0]}
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </Motion.div>
             )
           })}
         </div>
       </section>
 
       {/* COMPARISON TABLE */}
-      <section className="py-24 bg-navy-50/60 border-y border-slate-200/70">
+      <section className="py-24 bg-navy-50/60 border-y border-[var(--color-border-primary)]/70">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             center
@@ -147,7 +147,7 @@ export default function Services() {
             title="Compare your options side by side."
             description="A quick look at how our most popular accounts stack up. An advisor can help you pick the right mix."
           />
-          <div className="mt-14 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="mt-14 overflow-x-auto rounded-2xl border border-[var(--color-border-primary)] bg-[var(--color-surface-primary)] shadow-sm">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="bg-navy-800 text-white">
@@ -170,8 +170,8 @@ export default function Services() {
               </thead>
               <tbody>
                 {comparisonRows.map((row, i) => (
-                  <tr key={row.feature} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/70'}>
-                    <td className="px-6 py-4 font-semibold text-navy-800">{row.feature}</td>
+                  <tr key={row.feature} className={i % 2 === 0 ? 'bg-[var(--color-surface-primary)]' : 'bg-[var(--color-surface-secondary)]/70'}>
+                    <td className="px-6 py-4 font-semibold text-[var(--color-text-primary)]">{row.feature}</td>
                     <td className="px-6 py-4 text-slate-700">{row.brokerage}</td>
                     <td className="px-6 py-4 text-slate-700">{row.tradIra}</td>
                     <td className="px-6 py-4 text-slate-700 bg-[#10b981]/5">{row.rothIra}</td>
@@ -185,12 +185,12 @@ export default function Services() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-[var(--color-surface-primary)]">
         <div className="max-w-5xl mx-auto px-6 text-center">
-          <h3 className="font-display text-4xl md:text-5xl font-semibold text-navy-800 tracking-tight">
+          <h3 className="font-display text-4xl md:text-5xl font-semibold text-[var(--color-text-primary)] tracking-tight">
             Not sure which is right for you?
           </h3>
-          <p className="mt-5 text-lg text-slate-600">
+          <p className="mt-5 text-lg text-[var(--color-text-secondary)]">
             Take the 4-minute retirement readiness quiz and we’ll recommend a mix in plain English.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
