@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Fraunces', ui-serif, Georgia, serif;
+
+  --color-navy-50: #f1f5fb;
+  --color-navy-100: #d9e3f1;
+  --color-navy-200: #a9bcdb;
+  --color-navy-300: #7a95c4;
+  --color-navy-400: #486c9f;
+  --color-navy-500: #1f4476;
+  --color-navy-600: #163359;
+  --color-navy-700: #0e2443;
+  --color-navy-800: #0a2540;
+  --color-navy-900: #051428;
+  --color-navy-950: #030a17;
+
+  --color-brand-emerald: #10b981;
+  --color-brand-emerald-bright: #34d399;
+  --color-brand-emerald-deep: #047857;
+
+  --color-brand-gold: #f5b700;
+  --color-brand-gold-soft: #fcd34d;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: #0a2540;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+}
+
+::selection {
+  background: #10b981;
+  color: white;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-20px) translateX(10px); }
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}

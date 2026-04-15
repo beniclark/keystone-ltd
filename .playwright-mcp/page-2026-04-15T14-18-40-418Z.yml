@@ -1,0 +1,267 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Keystone" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e7]:
+          - img [ref=e8]
+          - generic [ref=e11]: Keystone
+      - navigation [ref=e12]:
+        - link "Services" [ref=e13] [cursor=pointer]:
+          - /url: /services
+        - link "About" [ref=e14] [cursor=pointer]:
+          - /url: /about
+      - generic [ref=e15]:
+        - link "Log in" [ref=e16] [cursor=pointer]:
+          - /url: /login
+        - link "Open an account" [ref=e17] [cursor=pointer]:
+          - /url: /signup
+  - main [ref=e18]:
+    - generic [ref=e19]:
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - img [ref=e24]
+            - generic [ref=e27]: Now with AI-powered retirement forecasting
+          - heading "Your money, working as hard as you do." [level=1] [ref=e28]:
+            - text: Your money,
+            - text: working as hard
+            - text: as you do.
+          - paragraph [ref=e29]: Keystone brings investments, retirement, and insurance into a single plan — backed by real advisors and built for the long game.
+          - generic [ref=e30]:
+            - link "Open an account" [ref=e31] [cursor=pointer]:
+              - /url: /signup
+              - text: Open an account
+              - img [ref=e32]
+            - link "Talk to an advisor" [ref=e34] [cursor=pointer]:
+              - /url: /services
+          - generic [ref=e41]:
+            - img [ref=e42]
+            - img [ref=e44]
+            - img [ref=e46]
+            - img [ref=e48]
+            - img [ref=e50]
+            - generic [ref=e52]: Trusted by 2.3M members
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58]:
+              - generic [ref=e59]: Net worth
+              - generic [ref=e60]: $1,284,560
+            - generic [ref=e61]:
+              - img [ref=e62]
+              - text: +2.4%
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - generic [ref=e82]: Brokerage
+              - generic [ref=e83]: $184,220
+            - generic [ref=e84]:
+              - generic [ref=e87]: 401(k)
+              - generic [ref=e88]: $612,305
+            - generic [ref=e89]:
+              - generic [ref=e92]: Term Life
+              - generic [ref=e93]: $750K cover
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - generic [ref=e97]: $482B
+          - generic [ref=e98]: Assets under management
+        - generic [ref=e99]:
+          - generic [ref=e100]: 2.3M
+          - generic [ref=e101]: Members served
+        - generic [ref=e102]:
+          - generic [ref=e103]: 50 yrs
+          - generic [ref=e104]: Serving families
+        - generic [ref=e105]:
+          - generic [ref=e106]: A+
+          - generic [ref=e107]: AM Best rating
+    - generic [ref=e109]:
+      - generic [ref=e111]:
+        - generic [ref=e112]: What we do
+        - heading "One membership. Every part of your financial life." [level=2] [ref=e114]
+        - paragraph [ref=e115]: Invest, retire, and protect your family with a single plan and a real advisor — no spreadsheet gymnastics required.
+      - generic [ref=e116]:
+        - generic [ref=e117]:
+          - img [ref=e119]
+          - heading "Investments" [level=3] [ref=e122]
+          - paragraph [ref=e123]: Brokerage, ETFs, mutual funds, and managed portfolios built for long-term growth.
+          - generic [ref=e124]:
+            - text: Learn more
+            - img [ref=e125]
+        - generic [ref=e127]:
+          - img [ref=e129]
+          - heading "Retirement" [level=3] [ref=e133]
+          - paragraph [ref=e134]: 401(k), IRAs, Roth IRAs, and annuities designed to carry you into the next chapter.
+          - generic [ref=e135]:
+            - text: Learn more
+            - img [ref=e136]
+        - generic [ref=e138]:
+          - img [ref=e140]
+          - heading "Insurance" [level=3] [ref=e143]
+          - paragraph [ref=e144]: Term life, disability, dental, vision, and long-term care — the safety net that fits your life.
+          - generic [ref=e145]:
+            - text: Learn more
+            - img [ref=e146]
+        - generic [ref=e148]:
+          - img [ref=e150]
+          - heading "Financial Planning" [level=3] [ref=e153]
+          - paragraph [ref=e154]: Fee-only advisors, goal-based planning, and digital tools that keep you on track.
+          - generic [ref=e155]:
+            - text: Learn more
+            - img [ref=e156]
+    - generic [ref=e159]:
+      - generic [ref=e161]:
+        - generic [ref=e162]: How it works
+        - heading "From signup to plan in under 10 minutes." [level=2] [ref=e164]
+        - paragraph [ref=e165]: A real advisor, a real plan — without the four-hour office visit.
+      - generic [ref=e166]:
+        - generic [ref=e167]:
+          - generic [ref=e168]: "01"
+          - heading "Tell us your goals" [level=3] [ref=e169]
+          - paragraph [ref=e170]: Answer a few questions about where you want to be in 5, 10, and 30 years. Takes about four minutes.
+        - generic [ref=e171]:
+          - generic [ref=e172]: "02"
+          - heading "Get your plan" [level=3] [ref=e173]
+          - paragraph [ref=e174]: A dedicated advisor builds a personalized plan across investments, retirement, and coverage — free.
+        - generic [ref=e175]:
+          - generic [ref=e176]: "03"
+          - heading "Grow with confidence" [level=3] [ref=e177]
+          - paragraph [ref=e178]: Automated investing, annual check-ins, and 24/7 access to your portfolio and coverage in one place.
+    - generic [ref=e180]:
+      - generic [ref=e182]:
+        - generic [ref=e183]: Members
+        - heading "The advice people wish they’d had sooner." [level=2] [ref=e185]
+      - generic [ref=e186]:
+        - blockquote [ref=e187]:
+          - generic [ref=e188]:
+            - img [ref=e189]
+            - img [ref=e191]
+            - img [ref=e193]
+            - img [ref=e195]
+            - img [ref=e197]
+          - paragraph [ref=e199]: “Keystone consolidated four old 401(k)s and my disability policy in a single afternoon. My advisor actually calls me back.”
+          - generic [ref=e200]:
+            - generic [ref=e201]: PS
+            - generic [ref=e202]:
+              - generic [ref=e203]: Priya Shah
+              - generic [ref=e204]: Pediatrician, San Diego
+        - blockquote [ref=e205]:
+          - generic [ref=e206]:
+            - img [ref=e207]
+            - img [ref=e209]
+            - img [ref=e211]
+            - img [ref=e213]
+            - img [ref=e215]
+          - paragraph [ref=e217]: “Between payroll, our SEP-IRA, and life insurance for the kids, it finally feels like everything is on the same page.”
+          - generic [ref=e218]:
+            - generic [ref=e219]: MD
+            - generic [ref=e220]:
+              - generic [ref=e221]: Marcus Delgado
+              - generic [ref=e222]: Small-business owner, Austin
+        - blockquote [ref=e223]:
+          - generic [ref=e224]:
+            - img [ref=e225]
+            - img [ref=e227]
+            - img [ref=e229]
+            - img [ref=e231]
+            - img [ref=e233]
+          - paragraph [ref=e235]: “The retirement score was a wake-up call. One year later I’m on track and paying less in fees than my old robo.”
+          - generic [ref=e236]:
+            - generic [ref=e237]: ER
+            - generic [ref=e238]:
+              - generic [ref=e239]: Elena Rossi
+              - generic [ref=e240]: Software engineer, Portland
+    - generic [ref=e245]:
+      - generic [ref=e246]:
+        - heading "Ready to build your keystone?" [level=3] [ref=e247]
+        - paragraph [ref=e248]: Open your account in under four minutes. No paperwork, no hidden fees.
+      - generic [ref=e249]:
+        - link "Open an account" [ref=e250] [cursor=pointer]:
+          - /url: /signup
+          - text: Open an account
+          - img [ref=e251]
+        - link "Explore services" [ref=e253] [cursor=pointer]:
+          - /url: /services
+  - contentinfo [ref=e254]:
+    - generic [ref=e255]:
+      - generic [ref=e256]:
+        - generic [ref=e257]:
+          - generic [ref=e258]:
+            - img [ref=e259]
+            - generic [ref=e262]: Keystone
+          - paragraph [ref=e263]: Keystone Financial helps 2.3 million people invest, protect, and retire with confidence. Advice that fits, investments that work, coverage that matters.
+          - generic [ref=e264]:
+            - link "social link" [ref=e265] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e266]
+            - link "social link" [ref=e269] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e270]
+            - link "social link" [ref=e273] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e274]
+            - link "social link" [ref=e278] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e279]
+        - generic [ref=e285]:
+          - generic [ref=e286]:
+            - heading "Products" [level=4] [ref=e287]
+            - list [ref=e288]:
+              - listitem [ref=e289]:
+                - link "Investments" [ref=e290] [cursor=pointer]:
+                  - /url: /services
+              - listitem [ref=e291]:
+                - link "Retirement" [ref=e292] [cursor=pointer]:
+                  - /url: /services
+              - listitem [ref=e293]:
+                - link "Insurance" [ref=e294] [cursor=pointer]:
+                  - /url: /services
+              - listitem [ref=e295]:
+                - link "Financial Planning" [ref=e296] [cursor=pointer]:
+                  - /url: /services
+          - generic [ref=e297]:
+            - heading "Company" [level=4] [ref=e298]
+            - list [ref=e299]:
+              - listitem [ref=e300]:
+                - link "About us" [ref=e301] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e302]:
+                - link "Leadership" [ref=e303] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e304]:
+                - link "Careers" [ref=e305] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e306]:
+                - link "Newsroom" [ref=e307] [cursor=pointer]:
+                  - /url: /about
+          - generic [ref=e308]:
+            - heading "Resources" [level=4] [ref=e309]
+            - list [ref=e310]:
+              - listitem [ref=e311]:
+                - link "Retirement calculator" [ref=e312] [cursor=pointer]:
+                  - /url: /services
+              - listitem [ref=e313]:
+                - link "Market insights" [ref=e314] [cursor=pointer]:
+                  - /url: /services
+              - listitem [ref=e315]:
+                - link "Education center" [ref=e316] [cursor=pointer]:
+                  - /url: /services
+              - listitem [ref=e317]:
+                - link "Help center" [ref=e318] [cursor=pointer]:
+                  - /url: /about
+          - generic [ref=e319]:
+            - heading "Legal" [level=4] [ref=e320]
+            - list [ref=e321]:
+              - listitem [ref=e322]:
+                - link "Privacy" [ref=e323] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e324]:
+                - link "Terms of use" [ref=e325] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e326]:
+                - link "Form CRS" [ref=e327] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e328]:
+                - link "Accessibility" [ref=e329] [cursor=pointer]:
+                  - /url: /about
+      - generic [ref=e330]:
+        - paragraph [ref=e331]: © 2026 Keystone Financial Group, Inc. All rights reserved.
+        - paragraph [ref=e332]: Securities offered through Keystone Brokerage Services, LLC, Member FINRA/SIPC. Insurance products issued by Keystone Life & Annuity Co. Investment advisory services offered through Keystone Advisors, a registered investment adviser. Not FDIC insured. Not a deposit. May lose value.

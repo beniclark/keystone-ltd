@@ -1,0 +1,33 @@
+export const mockUser = {
+  firstName: 'Alex',
+  lastName: 'Morgan',
+  email: 'alex.morgan@example.com',
+  memberSince: '2019',
+  advisor: {
+    name: 'Rachel Kim, CFP®',
+    title: 'Senior Financial Advisor',
+    nextReview: 'Jun 12, 2026',
+  },
+  netWorth: 1284560.42,
+  netWorthDelta: 2.4,
+  netWorthSeries: [
+    { month: 'May', value: 1095000 },
+    { month: 'Jun', value: 1108000 },
+    { month: 'Jul', value: 1131000 },
+    { month: 'Aug', value: 1152000 },
+    { month: 'Sep', value: 1140000 },
+    { month: 'Oct', value: 1178000 },
+    { month: 'Nov', value: 1196000 },
+    { month: 'Dec', value: 1215000 },
+    { month: 'Jan', value: 1224000 },
+    { month: 'Feb', value: 1240000 },
+    { month: 'Mar', value: 1255000 },
+    { month: 'Apr', value: 1284560 },
+  ],
+  allocation: [
+    { name: 'Stocks', value: 58, color: '#10b981' },
+    { name: 'Bonds', value: 22, color: '#0a2540' },
+    { name: 'Cash', value: 12, color: '#f5b700' },
+    { name: 'Alternatives', value: 8, color: '#7a95c4' },
+  ],
+}
