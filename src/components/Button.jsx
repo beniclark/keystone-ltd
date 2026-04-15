@@ -5,16 +5,15 @@ const base =
 
 const variants = {
   primary:
-    'bg-[#10b981] text-white hover:bg-[#059669] shadow-sm hover:shadow-md hover:-translate-y-0.5',
+    'bg-brand-emerald text-white hover:bg-brand-emerald-deep shadow-sm hover:shadow-md hover:-translate-y-0.5',
   dark:
     'bg-navy-800 text-white hover:bg-navy-700 shadow-sm hover:shadow-md hover:-translate-y-0.5',
   light:
-    'bg-white text-navy-800 hover:bg-navy-50 shadow-sm hover:shadow-md hover:-translate-y-0.5',
+    'bg-[var(--color-surface-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-secondary)] shadow-sm hover:shadow-md hover:-translate-y-0.5',
   outline:
-    'bg-transparent text-navy-800 border border-navy-200 hover:border-navy-400 hover:bg-navy-50',
-  outlineDark:
-    'bg-transparent text-white border border-white/40 hover:border-white hover:bg-white/10',
-  ghost: 'bg-transparent text-navy-700 hover:bg-navy-50',
+    'bg-transparent text-[var(--color-text-primary)] border border-[var(--color-border-primary)] hover:bg-[var(--color-surface-secondary)]',
+  outlineDark: 'bg-transparent text-white border border-white/40 hover:border-white hover:bg-white/10',
+  ghost: 'bg-transparent text-[var(--color-text-primary)] hover:bg-[var(--color-surface-secondary)]',
 }
 
 const sizes = {

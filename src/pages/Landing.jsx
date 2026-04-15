@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 import {
   TrendingUp,
   Target,
@@ -34,13 +34,13 @@ export default function Landing() {
 
         <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-32 md:pt-28 md:pb-40">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
-            <motion.div
+            <Motion.div
               className="lg:col-span-7"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-medium text-emerald-300 mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-surface-primary)]/10 border border-white/15 text-xs font-medium text-emerald-300 mb-6">
                 <Sparkles size={14} />
                 <span>Now with AI-powered retirement forecasting</span>
               </div>
@@ -81,16 +81,16 @@ export default function Landing() {
                   <span className="ml-1.5">Trusted by 2.3M members</span>
                 </div>
               </div>
-            </motion.div>
+            </Motion.div>
 
-            <motion.div
+            <Motion.div
               className="lg:col-span-5 relative"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             >
               <HeroCard />
-            </motion.div>
+            </Motion.div>
           </div>
         </div>
 
@@ -111,41 +111,41 @@ export default function Landing() {
       </section>
 
       {/* SERVICES */}
-      <section className="py-24 md:py-32 bg-white">
+      <section className="py-24 md:py-32 bg-[var(--color-surface-primary)]">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div {...fadeUp}>
+          <Motion.div {...fadeUp}>
             <SectionHeading
               eyebrow="What we do"
               title="One membership. Every part of your financial life."
               description="Invest, retire, and protect your family with a single plan and a real advisor — no spreadsheet gymnastics required."
             />
-          </motion.div>
+          </Motion.div>
 
           <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {services.map((svc, i) => {
               const Icon = iconMap[svc.icon] || TrendingUp
               return (
-                <motion.div
+                <Motion.div
                   key={svc.id}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-60px' }}
                   transition={{ duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  className="group relative p-7 rounded-2xl border border-slate-200 bg-white hover:border-navy-300 hover:shadow-[0_20px_60px_-20px_rgba(10,37,64,0.25)] transition-all duration-300"
+                  className="group relative p-7 rounded-2xl border border-[var(--color-border-primary)] bg-[var(--color-surface-primary)] hover:border-navy-300 hover:shadow-[0_20px_60px_-20px_rgba(10,37,64,0.25)] transition-all duration-300"
                 >
-                  <div className="h-12 w-12 rounded-xl bg-navy-50 text-navy-800 flex items-center justify-center mb-6 group-hover:bg-[#10b981] group-hover:text-white transition-colors">
+                  <div className="h-12 w-12 rounded-xl bg-navy-50 text-[var(--color-text-primary)] flex items-center justify-center mb-6 group-hover:bg-[#10b981] group-hover:text-white transition-colors">
                     <Icon size={22} />
                   </div>
-                  <h3 className="font-display text-xl font-semibold text-navy-800">
+                  <h3 className="font-display text-xl font-semibold text-[var(--color-text-primary)]">
                     {svc.title}
                   </h3>
-                  <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                  <p className="mt-2 text-sm text-[var(--color-text-secondary)] leading-relaxed">
                     {svc.description}
                   </p>
                   <div className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-[#047857] group-hover:gap-2.5 transition-all">
                     Learn more <ArrowRight size={14} />
                   </div>
-                </motion.div>
+                </Motion.div>
               )
             })}
           </div>
@@ -153,64 +153,64 @@ export default function Landing() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="py-24 md:py-32 bg-navy-50/50 border-y border-slate-200/70">
+      <section className="py-24 md:py-32 bg-navy-50/50 border-y border-[var(--color-border-primary)]/70">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div {...fadeUp} className="text-center mx-auto">
+          <Motion.div {...fadeUp} className="text-center mx-auto">
             <SectionHeading
               center
               eyebrow="How it works"
               title="From signup to plan in under 10 minutes."
               description="A real advisor, a real plan — without the four-hour office visit."
             />
-          </motion.div>
+          </Motion.div>
           <div className="mt-16 grid md:grid-cols-3 gap-6">
             {steps.map((step, i) => (
-              <motion.div
+              <Motion.div
                 key={step.number}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }}
                 transition={{ duration: 0.55, delay: i * 0.1 }}
-                className="relative p-8 rounded-2xl bg-white border border-slate-200"
+                className="relative p-8 rounded-2xl bg-[var(--color-surface-primary)] border border-[var(--color-border-primary)]"
               >
                 <div className="font-display text-6xl font-semibold text-[#10b981]/20 leading-none">
                   {step.number}
                 </div>
-                <h3 className="mt-4 font-display text-2xl font-semibold text-navy-800">
+                <h3 className="mt-4 font-display text-2xl font-semibold text-[var(--color-text-primary)]">
                   {step.title}
                 </h3>
-                <p className="mt-3 text-slate-600 leading-relaxed">{step.description}</p>
-              </motion.div>
+                <p className="mt-3 text-[var(--color-text-secondary)] leading-relaxed">{step.description}</p>
+              </Motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="py-24 md:py-32 bg-white">
+      <section className="py-24 md:py-32 bg-[var(--color-surface-primary)]">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div {...fadeUp}>
+          <Motion.div {...fadeUp}>
             <SectionHeading
               eyebrow="Members"
               title="The advice people wish they’d had sooner."
             />
-          </motion.div>
+          </Motion.div>
           <div className="mt-16 grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
-              <motion.blockquote
+              <Motion.blockquote
                 key={t.name}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }}
                 transition={{ duration: 0.55, delay: i * 0.08 }}
-                className="p-8 rounded-2xl bg-navy-50/60 border border-slate-200"
+                className="p-8 rounded-2xl bg-navy-50/60 border border-[var(--color-border-primary)]"
               >
                 <div className="flex items-center gap-1 text-[#f5b700] mb-5">
                   {[0, 1, 2, 3, 4].map((s) => (
                     <Star key={s} size={15} className="fill-[#f5b700]" />
                   ))}
                 </div>
-                <p className="font-display text-lg text-navy-800 leading-snug">
+                <p className="font-display text-lg text-[var(--color-text-primary)] leading-snug">
                   “{t.quote}”
                 </p>
                 <footer className="mt-6 flex items-center gap-3">
@@ -226,18 +226,18 @@ export default function Landing() {
                       .join('')}
                   </div>
                   <div>
-                    <div className="font-semibold text-navy-800 text-sm">{t.name}</div>
-                    <div className="text-xs text-slate-500">{t.role}</div>
+                    <div className="font-semibold text-[var(--color-text-primary)] text-sm">{t.name}</div>
+                    <div className="text-xs text-[var(--color-text-muted)]">{t.role}</div>
                   </div>
                 </footer>
-              </motion.blockquote>
+              </Motion.blockquote>
             ))}
           </div>
         </div>
       </section>
 
       {/* FINAL CTA */}
-      <section className="pb-24 md:pb-32 bg-white">
+      <section className="pb-24 md:pb-32 bg-[var(--color-surface-primary)]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#047857] via-[#10b981] to-[#34d399] p-12 md:p-20">
             <div className="absolute inset-0 opacity-[0.08] bg-[radial-gradient(circle_at_1px_1px,_white_1px,_transparent_0)] [background-size:24px_24px]" />
@@ -271,7 +271,7 @@ function HeroCard() {
   return (
     <div className="relative">
       <div className="absolute -inset-6 bg-gradient-to-br from-[#10b981]/30 to-transparent rounded-[32px] blur-2xl" />
-      <div className="relative bg-white/[0.04] backdrop-blur-xl border border-white/15 rounded-3xl p-6 shadow-2xl">
+      <div className="relative bg-[var(--color-surface-primary)]/[0.04] backdrop-blur-xl border border-white/15 rounded-3xl p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-5">
           <div>
             <div className="text-xs uppercase tracking-[0.14em] text-navy-100/60">
@@ -305,7 +305,7 @@ function HeroCard() {
           ].map((row) => (
             <div
               key={row.label}
-              className="flex items-center justify-between px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10"
+              className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--color-surface-primary)]/[0.04] border border-white/10"
             >
               <div className="flex items-center gap-3">
                 <div

@@ -2,9 +2,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 
 export default function AllocationDonut({ data }) {
   return (
-    <div className="rounded-3xl bg-white p-8 border border-slate-200 shadow-sm h-full">
-      <div className="text-xs uppercase tracking-[0.14em] text-slate-500">Allocation</div>
-      <h3 className="font-display text-2xl font-semibold text-navy-800 mt-1">
+    <div className="rounded-3xl bg-[var(--color-surface-card)] p-8 border border-[var(--color-border-primary)] shadow-sm h-full">
+      <div className="text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)]">Allocation</div>
+      <h3 className="font-display text-2xl font-semibold text-[var(--color-text-primary)] mt-1">
         Portfolio mix
       </h3>
 
@@ -45,9 +45,9 @@ export default function AllocationDonut({ data }) {
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: d.color }}
                 />
-                <span className="text-slate-700 font-medium">{d.name}</span>
+                <span className="text-[var(--color-text-secondary)] font-medium">{d.name}</span>
               </div>
-              <span className="font-semibold text-navy-800">{d.value}%</span>
+              <span className="font-semibold text-[var(--color-text-primary)]">{d.value}%</span>
             </li>
           ))}
         </ul>

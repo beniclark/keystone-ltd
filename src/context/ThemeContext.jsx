@@ -1,0 +1,7 @@
+import { useTheme } from '../hooks/useTheme.js'
+import { ThemeContext } from './themeContext.js'
+
+export function ThemeProvider({ children }) {
+  const value = useTheme()
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+}
