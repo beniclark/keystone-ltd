@@ -201,10 +201,11 @@ export default function Profile() {
             <div className="max-w-xl">
               <div className="text-xs uppercase tracking-[0.14em] text-emerald-300">Your advisor</div>
               <h3 className="font-display text-3xl md:text-4xl font-semibold mt-2 tracking-tight">
-                Ready for your spring check-in with {profileState.data.advisor.name.split(',')[0] || 'your advisor'}?
+                Ready for your spring check-in with{' '}
+                {profileState.data?.advisor?.name?.split(',')[0] || 'your advisor'}?
               </h3>
               <p className="mt-3 text-navy-100/80">
-                Next suggested review: {profileState.data.advisor.nextReview || 'Soon'}.
+                Next suggested review: {profileState.data?.advisor?.nextReview || 'Soon'}.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">

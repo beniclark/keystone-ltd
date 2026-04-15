@@ -50,7 +50,7 @@ export default function Navbar() {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-[color-mix(in_oklab,var(--color-surface-primary)_90%,transparent)] backdrop-blur-md border-b border-[var(--color-border-primary)]'
+          ? 'bg-[var(--color-surface-primary)]/90 backdrop-blur-md border-b border-[var(--color-border-primary)]'
           : 'bg-transparent border-b border-transparent'
       }`}
     >

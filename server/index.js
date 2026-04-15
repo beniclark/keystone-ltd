@@ -18,6 +18,41 @@ if (!userCount) {
 app.use(cors())
 app.use(express.json())
 
+const rateLimitWindowMs = 60_000
+const maxRequestsPerWindow = 120
+const requestBuckets = new Map()
+
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, bucket] of requestBuckets.entries()) {
+    if (bucket.resetAt <= now) {
+      requestBuckets.delete(key)
+    }
+  }
+}, rateLimitWindowMs).unref?.()
+
+function rateLimit(req, res, next) {
+  const key = req.ip || 'unknown'
+  const now = Date.now()
+  const existing = requestBuckets.get(key)
+
+  if (!existing || existing.resetAt <= now) {
+    requestBuckets.set(key, { count: 1, resetAt: now + rateLimitWindowMs })
+    return next()
+  }
+
+  if (existing.count >= maxRequestsPerWindow) {
+    const retryAfter = Math.ceil((existing.resetAt - now) / 1000)
+    res.setHeader('Retry-After', retryAfter)
+    return res.status(429).json({ message: 'Too many requests, please try again shortly.' })
+  }
+
+  existing.count += 1
+  return next()
+}
+
+app.use('/api', rateLimit)
+
 function publicUser(user) {
   return {
     id: user.id,
