@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CalendarClock, MessageCircle, Wallet, Briefcase, ShieldCheck } from 'lucide-react'
+import { BarChart3, CalendarClock, MessageCircle, Wallet, Briefcase, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth.js'
 import Button from '../components/Button.jsx'
 import NetWorthCard from '../components/profile/NetWorthCard.jsx'
@@ -11,6 +11,9 @@ import { mockUser } from '../data/user.js'
 import { investmentAccounts, retirementAccounts } from '../data/accounts.js'
 import { insurancePolicies } from '../data/insurance.js'
 import { recentActivity } from '../data/activity.js'
+import OptionsPositionsSummary from '../components/options/OptionsPositionsSummary.jsx'
+import OptionsPositionCard from '../components/options/OptionsPositionCard.jsx'
+import { userPositions } from '../data/options/positions.js'
 
 function greeting() {
   const h = new Date().getHours()
@@ -84,6 +87,23 @@ export default function Profile() {
             {investmentAccounts.map((a) => (
               <AccountCard key={a.id} account={a} accent="emerald" />
             ))}
+          </div>
+        </Section>
+
+        {/* OPTIONS POSITIONS */}
+        <Section
+          icon={BarChart3}
+          eyebrow="Options"
+          title="Options positions"
+          description="Your active options strategies and their current performance."
+        >
+          <div className="space-y-6">
+            <OptionsPositionsSummary positions={userPositions} />
+            <div className="grid md:grid-cols-2 gap-5">
+              {userPositions.map((p) => (
+                <OptionsPositionCard key={p.id} position={p} />
+              ))}
+            </div>
           </div>
         </Section>
 

@@ -6,13 +6,12 @@ How to decide who handles what.
 
 | Work Type | Route To | Examples |
 |-----------|----------|----------|
-| {domain 1} | {Name} | {example tasks} |
-| {domain 2} | {Name} | {example tasks} |
-| {domain 3} | {Name} | {example tasks} |
-| Code review | {Name} | Review PRs, check quality, suggest improvements |
-| Testing | {Name} | Write tests, find edge cases, verify fixes |
-| Scope & priorities | {Name} | What to build next, trade-offs, decisions |
+| React components, UI, styling, theme, dark mode | Linus | Build components, fix layout, update theme tokens, add animations |
+| Express server, SQLite, APIs, auth, data layer | Rusty | Set up server, write routes, design schema, implement JWT |
+| Code review, architecture, scope decisions | Danny | Review PRs, evaluate approaches, decide scope, sign off |
+| Tests, QA, accessibility, edge cases | Livingston | Write tests, audit a11y, find edge cases, coverage analysis |
 | Session logging | Scribe | Automatic — never needs routing |
+| Work queue monitoring | Ralph | Track issues, check CI, nudge stalled work |
 
 ## Issue Routing
 
