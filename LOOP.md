@@ -98,6 +98,135 @@ CI will run on pull requests and require all checks to pass before merge (once b
 
 All three loops running in L1 report-only mode. Patterns evaluate issues, CI failures, and PR state, generate proposals, and write to the state ledger. No automated labels, comments, or delegations are performed.
 
+### Phase 6: Graduate Narrowly to L2 Assisted Draft PRs
+
+**Status:** ✅ Complete (double-gate in place)
+
+L2 delegation enabled per loop with independent feature flags. Double-gate enforcement:
+1. Per-loop mode must be L2
+2. Global `allowLiveDelegation` flag must be true
+
+### Phase 7: Label Cutover & Squad Cutover
+
+**Status:** ✅ Complete
+
+#### Label Normalization
+
+Loop system now uses canonical priority labels and loop-owned operational labels defined in `.loop/labels.json`:
+
+**Canonical Priority Labels:**
+- `P0: critical` — Blocking release, must be resolved immediately
+- `P1: high` — High priority, should be resolved this sprint
+- `P2: medium` — Medium priority, should be resolved next sprint
+- `P3: low` — Low priority, backlog item
+
+**Loop-Owned Labels:**
+- `loop:state` — Loop state ledger issue
+- `loop:paused` — Loop paused, no automated actions
+- `loop:managed` — Item managed by loop automation
+- `loop:queued` — Queued for loop processing
+- `loop:running` — Loop actively processing this item
+- `loop:blocked` — Loop cannot proceed, human intervention required
+- `loop:human-required` — Escalated to human, outside loop capabilities
+- `loop:verified` — Independent verification passed, ready for human approval
+
+#### Label Management
+
+```bash
+# Preview proposed label changes (dry-run, no writes)
+node scripts/loop/cli.mjs labels --dry-run
+npm run loop -- labels --dry-run
+
+# Apply label changes (requires GITHUB_TOKEN)
+node scripts/loop/cli.mjs labels --apply
+npm run loop -- labels --apply
+```
+
+The label sync script:
+- Validates `.loop/labels.json` against its JSON schema
+- Reports proposed creates, updates, and migrations
+- Fails closed if policy is missing or invalid
+- Never makes real API calls in tests (uses injectable transport)
+
+#### Deprecated Label Migration
+
+The `sync-squad-labels.yml` workflow creates `priority:p0`, `priority:p1`, `priority:p2` labels which overlap with canonical `P0: critical`, `P1: high`, `P2: medium`.
+
+**Migration steps:**
+1. Run `node scripts/loop/cli.mjs labels --dry-run` to preview changes
+2. Verify no active workflow depends on `priority:p*` labels for loop execution (confirmed: loop code does NOT reference priority:p* or squad:* labels)
+3. Run `node scripts/loop/cli.mjs labels --apply` to create/update canonical labels
+4. Manually migrate issues/PRs from `priority:p*` to `P*` labels (or create migration script)
+5. After migration complete: remove `priority:p*` from `sync-squad-labels.yml` in a dedicated cutover PR
+
+#### Squad Automation Coexistence
+
+Four Squad workflows currently run in parallel with loop workflows (shadow mode):
+
+| Squad Workflow | Loop Equivalent | Overlap Type | Cutover Status |
+|---|---|---|---|
+| `squad-heartbeat.yml` | `loop-issue-intake.yml` | Issue events, scheduled runs | Flagged for cutover PR |
+| `squad-triage.yml` | `loop-issue-intake.yml` | Issue triage, labeled events | Flagged for cutover PR |
+| `squad-issue-assign.yml` | Loop delegation adapter | Issue assignment, @copilot sessions | Flagged for cutover PR |
+| `sync-squad-labels.yml` | `.loop/labels.json` + label sync script | Label creation (priority:p*) | Flagged for cutover PR |
+
+**Important:** These workflows have been **flagged with cutover comments** but are **NOT disabled** in Phase 7. Per the plan's guardrail:
+
+> In a dedicated cutover PR, disable or remove overlapping triggers from: squad-heartbeat.yml, squad-triage.yml, squad-issue-assign.yml, sync-squad-labels.yml after label migration is complete.
+
+Disabling these workflows is a **significant behavior change** that requires:
+- Human approval via dedicated PR
+- Confirmation that loop meets L1/L2 acceptance criteria
+- Documented rollback plan (re-enable workflows + set `loop:paused` label)
+- Verification that no active issue/PR/workflow depends on `squad:*` labels for loop execution
+
+#### Loop Non-Dependency on .squad/
+
+**Confirmed:** No loop code path reads `.squad/team.md`, `.squad/routing.md`, or any `squad:*` label for loop decision-making.
+
+Verified via grep across:
+- `scripts/loop/` — No references to `.squad` or `squad:` ✓
+- `.github/hooks/` — No references to `.squad` or `squad:` ✓
+- `.github/agents/` — Contains Squad agent definition (expected), but loop agents don't read it ✓
+- `.loop/` — No references to `.squad` or `squad:` ✓
+
+The `.squad/` directory remains as historical/optional team metadata. Loop workflows, scripts, policy, state transitions, and adapters do not depend on it for execution.
+
+#### Rollback Plan
+
+If unexpected behavior appears after Squad workflow cutover:
+
+1. **Pause loop immediately:**
+   ```bash
+   # Add loop:paused label to state issue
+   gh issue edit <STATE_ISSUE_NUMBER> --add-label "loop:paused"
+   ```
+
+2. **Re-enable Squad workflows:**
+   ```bash
+   # In a rollback PR, remove the workflow_dispatch: disable lines
+   # or restore workflows from prior commit
+   git revert <CUTOVER_COMMIT>
+   ```
+
+3. **Verify Squad workflows resume:**
+   - Check that `squad-heartbeat.yml` runs on schedule
+   - Manually trigger `squad-triage.yml` with a test issue
+   - Confirm label sync works
+
+4. **Investigate and fix loop issue:**
+   - Review state ledger in the `loop:state` issue
+   - Check workflow run logs
+   - Validate config/policy changes
+
+5. **Resume loop after fix:**
+   ```bash
+   # Remove loop:paused label
+   gh issue edit <STATE_ISSUE_NUMBER> --remove-label "loop:paused"
+   ```
+
+**Note:** Rollback does NOT require restoring `.squad/` state — loop never depended on it.
+
 ### Phase 6: L2 Graduation with Double-Gate Safety
 
 **Status:** ✅ Complete

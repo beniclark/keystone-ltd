@@ -6,6 +6,21 @@ name: Squad Heartbeat (Ralph)
 #   - .github/workflows/squad-heartbeat.yml (active workflow)
 # Run 'squad upgrade' to sync installed copies from source templates.
 
+# ⚠️ PHASE 7 CUTOVER NOTICE:
+#   This workflow overlaps with .github/workflows/loop-issue-intake.yml, which also
+#   processes issue events (opened, reopened, labeled) and runs scheduled reconciliation.
+#   Both workflows currently run in parallel (shadow mode) for comparison.
+#
+#   CUTOVER PLAN (requires human approval via dedicated PR):
+#     1. Confirm loop-issue-intake.yml meets L1/L2 acceptance criteria
+#     2. Verify no active issue depends on squad:* labels for loop execution
+#     3. Document rollback: re-enable this workflow + set loop:paused label
+#     4. In a dedicated cutover PR: disable or remove this workflow's issue triggers
+#     5. Keep team.md-based label sync and @copilot assignment separate from loop
+#
+#   DO NOT disable this workflow without human approval and rollback plan.
+#   See LOOP.md and .loop/labels.json for Phase 7 cutover details.
+
 on:
   schedule:
     # Every 30 minutes — adjust via cron expression as needed

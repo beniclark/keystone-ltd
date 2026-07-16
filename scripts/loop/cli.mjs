@@ -7,6 +7,7 @@ import { loadConfig } from './core/config.mjs'
 import { loadPolicy } from './core/policy.mjs'
 import { isEligibleForL2 } from './core/graduation.mjs'
 import { createWorktreeManager } from './isolation/worktree.mjs'
+import { main as labelsSync } from './labels-sync.mjs'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
@@ -24,6 +25,7 @@ export function parseArgs(argv) {
     mode: 'l1',
     dryRun: true,
     source: null,
+    apply: false,
   }
 
   for (let i = 3; i < argv.length; i++) {
@@ -39,6 +41,11 @@ export function parseArgs(argv) {
     } else if (arg === '--dry-run' && next) {
       args.dryRun = next === 'true' || next === '1'
       i++
+    } else if (arg === '--dry-run') {
+      args.dryRun = true
+    } else if (arg === '--apply') {
+      args.apply = true
+      args.dryRun = false
     } else if (arg === '--source' && next) {
       args.source = next
       i++
@@ -312,25 +319,25 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
       case 'bootstrap':
         await bootstrap()
         break
-      case 'dry-run':
-        await dryRun(args)
+      case 'graduate':
+        await graduate(args.source)
         break
-      case 'run':
-        await run(args)
+      case 'labels':
+        await labelsSync(args.apply ? ['node', 'labels-sync.mjs', '--apply'] : ['node', 'labels-sync.mjs'])
         break
-      case 'pause':
-        await pause()
+      case 'worktree:list':
+        await worktreeList(args.pattern)
         break
-      case 'resume':
-        await resume()
+      case 'worktree:cleanup':
+        await worktreeCleanup(args)
         break
       case 'help':
-        help()
+        printHelp()
         process.exit(0)
         break
       default:
         console.error(`Unknown command: ${args.command}`)
-        help()
+        printHelp()
         process.exit(1)
     }
   } catch (err) {

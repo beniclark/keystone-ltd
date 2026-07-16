@@ -1,5 +1,30 @@
 name: Sync Squad Labels
 
+# ⚠️ PHASE 7 CUTOVER NOTICE:
+#   This workflow creates and syncs labels including priority:p0, priority:p1, priority:p2,
+#   which overlap with the canonical priority labels defined in .loop/labels.json:
+#     - priority:p0 → P0: critical
+#     - priority:p1 → P1: high
+#     - priority:p2 → P2: medium
+#
+#   The loop system uses the canonical P0–P3 labels and does not depend on priority:p* labels.
+#
+#   LABEL MIGRATION PLAN (requires human verification):
+#     1. Run `node scripts/loop/cli.mjs labels --dry-run` to preview changes
+#     2. Review proposed label creates/updates in the dry-run report
+#     3. Verify no active workflow outside loop system depends on priority:p* labels
+#     4. Run `node scripts/loop/cli.mjs labels --apply` to create/update canonical labels
+#     5. Manually migrate issues/PRs from priority:p* to P* labels (or create migration script)
+#     6. After migration complete: remove priority:p* entries from PRIORITY_LABELS array below
+#
+#   CUTOVER PLAN (requires human approval via dedicated PR):
+#     1. Confirm label migration is complete and no issues/PRs use priority:p* labels
+#     2. In a dedicated cutover PR: remove priority:p* label creation from this workflow
+#     3. Keep squad:* label sync and go:/release:/type: labels separate from loop
+#
+#   DO NOT remove priority:p* label creation until migration is verified complete.
+#   See LOOP.md and .loop/labels.json for Phase 7 label normalization details.
+
 on:
   push:
     paths:

@@ -1,5 +1,20 @@
 name: Squad Issue Assign
 
+# ⚠️ PHASE 7 CUTOVER NOTICE:
+#   This workflow overlaps with .github/workflows/loop-issue-intake.yml and the loop
+#   delegation adapter (scripts/loop/delegates/github-copilot.mjs), which also assign
+#   issues and create agent sessions.
+#   Both systems currently run in parallel (shadow mode) for comparison.
+#
+#   CUTOVER PLAN (requires human approval via dedicated PR):
+#     1. Confirm loop delegation meets L1/L2 acceptance criteria
+#     2. Verify no active workflow depends on squad:* labels for loop execution
+#     3. Document rollback: re-enable this workflow + set loop:paused label
+#     4. In a dedicated cutover PR: disable or remove this workflow
+#
+#   DO NOT disable this workflow without human approval and rollback plan.
+#   See LOOP.md and .loop/labels.json for Phase 7 cutover details.
+
 on:
   issues:
     types: [labeled]

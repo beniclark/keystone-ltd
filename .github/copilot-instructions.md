@@ -24,6 +24,19 @@ npm run loop:dry-run    # Simulate loop actions without GitHub writes
 
 Loop commands invoke `scripts/loop/cli.mjs`. Use `loop:doctor` to check configuration validity and `loop:dry-run` to preview actions before enabling L2 mode.
 
+**Phase 7 — Label management:**
+
+```bash
+# Preview label changes (dry-run, default mode)
+node scripts/loop/cli.mjs labels
+node scripts/loop/cli.mjs labels --dry-run
+
+# Apply label changes (requires GITHUB_TOKEN)
+node scripts/loop/cli.mjs labels --apply
+```
+
+Label sync validates `.loop/labels.json` against its schema, reports proposed creates/updates/migrations, and applies changes with fail-closed policy enforcement.
+
 ## Architecture
 
 Single-page React 19 app using Vite 8 and Tailwind CSS v4. Client-side routing via react-router-dom v7 with a shared `Layout` shell (Navbar + Outlet + Footer). The `/profile` route is protected by `ProtectedRoute`, which redirects unauthenticated users to `/login`.
@@ -50,6 +63,16 @@ Loop configuration, policy, and schemas are versioned in `.loop/` and `scripts/l
 - Max 2 concurrent loop-created PRs
 - No auto-merge (human approval always required)
 - Protected paths require human gate (`.github/workflows/**`, `.github/hooks/**`, `.loop/**`, `package.json`, `src/lib/auth.js`)
+
+**Phase 7 — Label normalization:**
+
+Loop uses canonical priority labels (`P0: critical`, `P1: high`, `P2: medium`, `P3: low`) and loop-owned operational labels (`loop:state`, `loop:paused`, `loop:managed`, `loop:queued`, `loop:running`, `loop:blocked`, `loop:human-required`, `loop:verified`).
+
+Deprecated `priority:p*` labels from Squad automation are mapped to canonical equivalents in `.loop/labels.json`. The label sync script (`scripts/loop/labels-sync.mjs`) handles migration with human verification required before applying.
+
+**Squad automation coexistence:** Four Squad workflows (`squad-heartbeat.yml`, `squad-triage.yml`, `squad-issue-assign.yml`, `sync-squad-labels.yml`) currently run in parallel with loop workflows for comparison (shadow mode). These are **flagged for future cutover** but remain active. Cutover requires a dedicated PR with human approval.
+
+**Loop does NOT depend on `.squad/` files:** Loop workflows, scripts, policy, state transitions, and adapters do not read `.squad/team.md`, `.squad/routing.md`, or `squad:*` labels for decision-making. The `.squad/` directory remains as optional team metadata.
 
 See `LOOP.md` for operating guide and `npm run loop:doctor` for configuration validation.
 
