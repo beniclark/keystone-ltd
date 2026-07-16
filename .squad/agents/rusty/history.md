@@ -271,3 +271,50 @@ Phase 6 adds L2 graduation capability WITHOUT changing Phase 5 behavior. Default
 - Livingston''s test coverage expands to 412 tests (added 52 graduation tests)
 - No Squad coordination needed — loop system is independent of `.squad/` conventions
 - Rollback is config-only: set mode back to L1 or allowLiveDelegation to false
+### Loop Live Source Fetching (2026-07-16)
+
+**Context:** Wired live `--source` fetching for loop CLI so `node scripts/loop/cli.mjs run --pattern <name> --source <ref>` (the exact invocation used by production workflows) now builds real pattern input from GitHub API instead of requiring a fixture file.
+
+**What worked:**
+- **Fail-closed error handling** — when GITHUB_TOKEN missing or fetch fails, CLI exits gracefully (code 0) with a clear message, no crashes. Consistent with broader codebase pattern (policy.mjs, graduation.mjs).
+- **Preserving fixture path** — kept `--fixture` flow 100% unchanged. Both paths (fixture and live source) converge on the same normalized input shape for pattern evaluation.
+- **Shared normalization function** — `normalizeGitHubPayload()` recursively converts snake_case to camelCase for both fixture and live paths. Eliminates duplication and ensures pattern modules always see consistent keys (workflowRun, pullRequest, checkRuns, etc).
+- **Injected transport in connector** — GitHubConnector constructor takes `fetchImpl` parameter, making tests fast and deterministic (no real network calls, mock fetch returns test shapes). Matches existing github-connector.test.mjs conventions exactly.
+- **GITHUB_REPOSITORY parsing** — reused exact pattern from labels-sync.mjs: `process.env.GITHUB_REPOSITORY?.split('/')[0]` / `[1]`, with fallback to `{ owner: 'OWNER', repo: 'REPO' }` for local dev.
+- **REST API response unwrapping** — GitHub wraps lists in objects like `{ total_count, jobs: [...] }` and `{ total_count, check_runs: [...] }`. `buildInputFromSource()` extracts arrays with `jobsResponse.jobs || []` and `checksResponse.check_runs || []` to handle both shapes safely.
+
+**What was tricky:**
+- **Issue-intake action field limitation** — real webhook events have `action: 'opened'/'edited'/'reopened'`, but `--source` only gives the issue number. Production workflows pass the issue number via workflow trigger, not the original webhook action. Solution: default to `action: 'reconciliation'` as a safe, honest label. Pattern evaluation doesn't depend on exact action value for most logic.
+- **CI-sweeper logs field gap** — `getWorkflowRunLogs()` returns a redirect URL string, not actual log content (redirect-following/zip-unpacking is out of scope per existing NEEDS_LIVE_VERIFICATION TODO in github.mjs). Passed `logs: ''` to ci-sweeper input. Pattern already defaults `logs = ''` and works from job/step names/conclusions primarily, so this is acceptable and honest about the gap.
+- **PR-babysitter conversation/linkedIssue gaps** — fetching review-comment threads (`conversations`) and resolving linked-issue references from PR body text (`linkedIssue`) are NOT implemented (both are meaningfully larger scope than this task). Passed `conversations: []` and `linkedIssue: null` as honest gaps. Pattern evaluation has safe fallbacks for both fields.
+- **PriorState gap** — all patterns receive `priorState: {}` since reading/parsing the state ledger from the GitHub issue labeled `loop:state` is a separate, larger integration. Pattern modules handle empty priorState safely (first-time evaluation paths).
+- **Test environment flakiness** — vitest worker-pool timeout errors are transient (not real test failures). Task brief warned about this; confirmed by re-running and seeing different files timeout each time while all actual assertions pass.
+
+**API design decisions:**
+- **`getRepoInfo()`** — pure function, reads `GITHUB_REPOSITORY` env var with fallback. Returns `{ owner, repo }` object. Exported for testing.
+- **`normalizeGitHubPayload(obj)`** — pure recursive function, converts snake_case keys to camelCase. Handles objects, arrays, primitives, null/undefined. Exported for testing.
+- **`buildInputFromSource(pattern, source, connector)`** — async function, builds pattern-specific input from live GitHub API. Takes connector as parameter (injectable for testing). Throws with clear error messages (wrapped by caller in run()). Exported for testing.
+- **`GitHubConnector.getWorkflowRunJobs(owner, repo, runId)`** — new method, returns raw API response (including wrapper object if present). Matches existing connector method style exactly.
+
+**Key contracts:**
+- Fixture path unchanged — `--fixture` still works exactly as before, no regressions
+- Live source path fail-closed — missing token or fetch errors exit gracefully (code 0), no crashes
+- Both paths converge on same normalized input shape for patterns
+- All gaps documented honestly: action field, logs, conversations, linkedIssue, priorState
+- No real network calls in tests — all connector methods use injected mock fetch
+
+**Known follow-up gaps (flagged, not in scope):**
+1. **Log content fetching** — `getWorkflowRunLogs()` returns redirect URL, not actual log content. Following redirect and unpacking zip requires live API verification (existing TODO in github.mjs).
+2. **State issue priorState lookup** — reading/parsing state ledger from GitHub issue labeled `loop:state` requires full state-issue integration (separate task, larger scope).
+3. **PR conversation threads** — fetching review-comment threads requires additional REST endpoints and nested pagination (not implemented).
+4. **Linked issue parsing** — resolving linked-issue references from PR body text (e.g., "Fixes #123") requires parsing and issue lookup (not implemented).
+5. **Issue-intake action limitation** — `--source` only gives issue number, not original webhook action. Defaulting to `reconciliation` is honest but loses true action fidelity vs real webhook event.
+
+**Test coverage:**
+- 18 new tests in cli-live-source.test.mjs (getRepoInfo, normalizeGitHubPayload, buildInputFromSource for all 3 patterns, error handling)
+- 2 new tests in github-connector.test.mjs (getWorkflowRunJobs happy path and error handling)
+- All 429+ prior tests still passing (worker-pool timeouts are environment flakiness, not real failures)
+- Lint, typecheck, build all clean
+- Fixture flow verified unchanged
+- Graceful failure verified (no token, exit 0)
+
