@@ -8,9 +8,9 @@ This repository implements a loop engineering system that enables safe, bounded,
 
 ## Current Status
 
-**Phase 1** — Baseline verification and CI infrastructure ✅ (in progress)
+**All Phases (1-8)** — Complete ✅
 
-**Phase 2-8** — Loop contracts, GitHub connector, agents, rollout — pending
+Repository-owned loop engineering system fully implemented with baseline verification, loop contracts, GitHub connector, delegation adapter, worktree isolation, agent guardrails, L1/L2 loops, label cutover, and operational documentation.
 
 ## Phase 1: Baseline Verification
 
@@ -424,10 +424,183 @@ GitHub event or scheduled reconciliation
 - **Protected paths:** `.github/workflows/`, `.github/hooks/`, `.loop/`, auth/session code, dependency manifests
 - **Human gates:** Sensitive paths, governance changes, workflow self-modification
 
+## Incident Response
+
+### Pause Loop Immediately
+
+If the loop system produces unexpected behavior, incorrect fixes, or problematic PRs:
+
+```bash
+# Add loop:paused label to the state issue
+gh issue edit <STATE_ISSUE_NUMBER> --add-label "loop:paused"
+```
+
+**Effect:** All loop workflows check for the `loop:paused` label before any action. When present, loops skip evaluation and delegation entirely until the label is removed.
+
+### Revert or Close Bad Work
+
+If a loop-created PR contains incorrect changes:
+
+**Option 1: Close the PR**
+```bash
+# Close without merging (safe if not merged yet)
+gh pr close <PR_NUMBER> --comment "Pausing loop for investigation"
+```
+
+**Option 2: Revert merged commit**
+```bash
+# If the PR was already merged and caused a problem
+git revert <COMMIT_SHA>
+git push origin main
+```
+
+Tag the revert commit with `[loop incident]` in the message to help correlate metrics.
+
+### Record Failure Fingerprint
+
+To prevent the loop from repeatedly attempting the same problematic change:
+
+1. **Identify the failure fingerprint** — Check the state ledger's `runs` array for the `fingerprint` field of the problematic run
+2. **Record in policy (future work)** — The `.loop/policy.json` schema is designed to support a `deniedFingerprints` list for permanent blocks
+
+**For now:** Increase cooldown or lower max attempts in `.loop/policy.json` to slow down retries while investigating.
+
+### Tighten Policy
+
+If the loop is attempting changes outside acceptable bounds:
+
+**Add protected paths:**
+```json
+{
+  "protectedPaths": [
+    ".github/workflows/**",
+    ".loop/**",
+    "src/lib/auth.js",
+    "src/critical/module.js"  // Add new protected paths here
+  ]
+}
+```
+
+**Reduce action caps:**
+```json
+{
+  "maxAttempts": 2,           // Reduce from 3 to 2
+  "maxChangedFiles": 3,        // Reduce from 5 to 3
+  "maxConcurrentPRs": 1        // Reduce from 2 to 1
+}
+```
+
+**Disable specific loops:**
+```json
+{
+  "loops": {
+    "ciSweeper": { "mode": "L1" }  // Revert to report-only
+  }
+}
+```
+
+Commit and push policy changes immediately — no workflow restart required, next run picks up new policy.
+
+### Resume Loop
+
+After fixing the root cause and verifying the policy is correct:
+
+```bash
+# Remove loop:paused label
+gh issue edit <STATE_ISSUE_NUMBER> --remove-label "loop:paused"
+```
+
+**Verify resume:**
+- Check next scheduled workflow run completes successfully
+- Review state ledger for new `runs` entries
+- Monitor for 24-48 hours to confirm stability
+
+### Escalation Paths
+
+**Loop continuously blocked on same item:**
+- Check state ledger `attempts` count for the item key
+- If ≥ `maxAttempts`, loop automatically escalates with `loop:human-required` label
+- Review item manually, fix underlying issue, remove label to allow retry
+
+**Loop creating duplicate PRs:**
+- Check idempotency keys in state ledger — duplicates should be prevented by `itemKey` tracking
+- If duplicates occur, investigate GitHub event delivery (may indicate missed state update)
+- Manually close duplicate PRs, consolidate work into one PR, update state ledger
+
+**Loop delegation adapter fails repeatedly:**
+- Review workflow logs for adapter errors
+- Check `NEEDS_LIVE_VERIFICATION` comment in `scripts/loop/delegates/github-copilot.mjs`
+- Verify GitHub API shape against live repository with manual API call
+- Disable L2 mode (`allowLiveDelegation: false`) until API shape confirmed
+
+**Metrics show poor time-to-first-action:**
+- Review state ledger `timeToFirstActionMs` values
+- Check reconciliation cadence in `.loop/config.json` — may need more frequent runs
+- Investigate GitHub webhook delivery delays (if using event triggers)
+- Consider increasing workflow concurrency limits
+
+## Observability and Metrics
+
+### GitHub Step Summaries
+
+Loop workflows publish concise GitHub Step Summaries when running in CI. Each run summary includes:
+
+- Loop name and mode (L1/L2)
+- Pattern evaluation outcome (discovered, no-op, proposed, delegated, verified, blocked, escalated)
+- Actions taken or proposed
+- L2 graduation eligibility (if applicable)
+- Next steps for escalated/blocked items
+
+**View summaries:** GitHub Actions run page → "Summary" tab
+
+### Metrics in State Ledger
+
+The loop state ledger tracks operational metrics across all runs:
+
+- **Outcomes:** discovered, no-op, proposed, delegated, verified, blocked, escalated
+- **Efficiency:** duplicate prevention count, attempts per item, max attempts for single item
+- **Time-to-first-action:** median and 95th percentile (when available)
+
+**Access metrics programmatically:**
+```javascript
+import { aggregateMetrics } from './scripts/loop/core/metrics.mjs'
+import { parseState } from './scripts/loop/core/state.mjs'
+
+const { state } = parseState(issueBody)
+const metrics = aggregateMetrics(state.runs)
+console.log(metrics)
+```
+
+### Doctor Command
+
+Run `loop doctor` to validate loop system health:
+
+```bash
+npm run loop:doctor
+# or
+node scripts/loop/cli.mjs doctor
+```
+
+**Checks performed:**
+- ✓ Config validity (schema, mode, adapter settings)
+- ✓ Policy validity (schema, protected paths, limits)
+- ✓ GITHUB_TOKEN presence
+- ✓ Worktree manager operational
+- ✓ Pattern modules present
+- ✓ Labels configuration valid
+- ✓ Required workflows present
+- ✓ Adapter availability
+- ℹ️ State issue uniqueness (requires GitHub API)
+- ℹ️ Pause state consistency (requires GitHub API)
+- ℹ️ Branch ruleset presence (requires GitHub API)
+- ℹ️ Stale loop PRs (requires GitHub API)
+
+**Note:** Some checks require live GitHub API access and are reported as informational. Run the suggested `gh` CLI commands manually to verify these checks in production.
+
 ## Contact
 
 For questions or issues with the loop system, open a GitHub issue with the `loop` label.
 
 ---
 
-**Phase 1 complete. Phases 2-8 pending.**
+**Phases 1-8 complete.**

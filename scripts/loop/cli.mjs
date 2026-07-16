@@ -57,15 +57,17 @@ export function parseArgs(argv) {
 
 /**
  * Doctor command - check system health
+ * Phase 8: Extended checks for state uniqueness, labels, workflows, adapter, and pause state
  */
 async function doctor() {
   console.log('=== Loop Doctor ===\n')
 
   let exitCode = 0
+  let config, policy
 
   // Check 1: Config validity
   try {
-    const config = await loadConfig(repoRoot)
+    config = await loadConfig(repoRoot)
     console.log('✓ Config loaded and valid')
     console.log(`  Mode: ${config.mode}`)
     console.log(`  Adapter: ${config.adapter.backend} (dry-run: ${config.adapter.dryRun})`)
@@ -76,7 +78,7 @@ async function doctor() {
 
   // Check 2: Policy validity
   try {
-    const policy = await loadPolicy(repoRoot)
+    policy = await loadPolicy(repoRoot)
     console.log('✓ Policy loaded and valid')
     console.log(`  Max attempts: ${policy.maxAttempts}`)
     console.log(`  Max files: ${policy.maxChangedFiles}`)
@@ -116,11 +118,83 @@ async function doctor() {
     }
   }
 
+  // Check 6: State issue uniqueness (best-effort — requires GitHub API)
+  console.log('\nℹ️ State issue uniqueness check requires GitHub API')
+  console.log('  Run manually: gh issue list --label "loop:state" --json number,title')
+  console.log('  Expected: Exactly one open issue with loop:state label')
+
+  // Check 7: Pause state consistency
+  if (config && config.labels) {
+    const pausedLabel = config.labels.paused
+    console.log(`\nℹ️ Pause state check: Look for label "${pausedLabel}" on state issue`)
+    console.log('  If present, all loops are paused — no automated actions will occur')
+  }
+
+  // Check 8: Required labels present (validate against labels.json)
+  try {
+    const labelsPath = resolve(repoRoot, '.loop/labels.json')
+    const labelsData = await readFile(labelsPath, 'utf-8')
+    const labelsConfig = JSON.parse(labelsData)
+    
+    const requiredLabels = [
+      ...Object.keys(labelsConfig.labels.priority || {}),
+      ...Object.keys(labelsConfig.labels.loop || {}),
+    ]
+    
+    console.log(`\n✓ Labels configuration valid (${requiredLabels.length} labels defined)`)
+    console.log('  Verify live sync: npm run loop -- labels --dry-run')
+  } catch (err) {
+    console.error(`\n✗ Labels configuration error: ${err.message}`)
+    exitCode = 1
+  }
+
+  // Check 9: Required workflows present
+  const requiredWorkflows = [
+    '.github/workflows/loop-issue-intake.yml',
+    '.github/workflows/loop-ci-sweeper.yml',
+    '.github/workflows/loop-pr-babysitter.yml',
+    '.github/workflows/loop-run.yml',
+    '.github/workflows/ci.yml',
+  ]
+  
+  console.log()
+  for (const workflow of requiredWorkflows) {
+    try {
+      await readFile(resolve(repoRoot, workflow), 'utf-8')
+      console.log(`✓ Workflow present: ${workflow}`)
+    } catch {
+      console.error(`✗ Missing workflow: ${workflow}`)
+      exitCode = 1
+    }
+  }
+
+  // Check 10: Branch ruleset presence (best-effort — requires GitHub API)
+  console.log('\nℹ️ Branch ruleset check requires GitHub API')
+  console.log('  Run manually: gh api repos/{owner}/{repo}/rulesets')
+  console.log('  Expected: Ruleset protecting main with required CI checks')
+
+  // Check 11: Adapter availability
+  try {
+    const adapterPath = resolve(repoRoot, 'scripts/loop/delegates/github-copilot.mjs')
+    await readFile(adapterPath, 'utf-8')
+    console.log('\n✓ GitHub Copilot adapter present')
+    console.log('  Note: Adapter contains NEEDS_LIVE_VERIFICATION — full E2E requires live Copilot API')
+  } catch (err) {
+    console.error(`\n✗ Adapter not found: ${err.message}`)
+    exitCode = 1
+  }
+
+  // Check 12: Stale open loop PRs (best-effort — requires GitHub API)
+  console.log('\nℹ️ Stale loop PR check requires GitHub API')
+  console.log('  Run manually: gh pr list --label "loop:managed" --json number,title,createdAt')
+  console.log('  Review: PRs open >7 days may need human intervention or cleanup')
+
   console.log()
   if (exitCode === 0) {
-    console.log('All checks passed.')
+    console.log('✅ All verifiable checks passed.')
+    console.log('\nℹ️ Some checks require live GitHub API access — see informational notes above.')
   } else {
-    console.log('Some checks failed. Review errors above.')
+    console.log('❌ Some checks failed. Review errors above.')
   }
 
   process.exit(exitCode)
