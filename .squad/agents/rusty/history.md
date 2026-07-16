@@ -71,3 +71,48 @@
 - Local `git worktree` manager for isolation
 - Backend-neutral delegation interface
 
+### Loop Engineering Phase 3 (2026-07-16)
+
+**Context:** Implemented Phase 3 — GitHub connector, Copilot delegation adapter, and worktree isolation primitive with comprehensive contract tests.
+
+**Architecture decisions:**
+- **Injected Transports for Testability:** GitHubConnector accepts `fetchImpl` parameter (defaults to global fetch); WorktreeManager accepts `execImpl` and `fsImpl` parameters. Zero live network or git operations in unit tests.
+- **Dry-Run by Default:** GitHubCopilotAdapter defaults to `dryRun: true`. Real delegation requires explicit opt-in. Dry-run returns complete, human-reviewable payload showing exact API calls that would be made.
+- **Backend-Neutral Delegation:** Abstract `DelegationAdapter` class defines contract: `delegate(request)` returns `DelegationResult`. Request includes source, objective, doneWhen conditions, path constraints, limits, verification commands, escalation instructions. Multiple backends can implement this interface.
+- **Cloud-Branch Isolation:** Separate validation and creation helpers for cloud-branch isolation results. Requires branch name before state can transition to "running". PR URL is optional.
+- **Worktree Safety:** Manager refuses branch switching inside worktrees, only removes clean/merged/abandoned worktrees, detects collisions via both `git worktree list` and JSON manifest. Branch naming: `loop/{pattern}/{source}-{run-id}`.
+- **Copilot Assignment API Shape:** Implemented as REST PATCH to `/repos/:owner/:repo/issues/:number` with `assignees: ["copilot"]`. **Flagged as NEEDS_LIVE_VERIFICATION** because actual bot username and exact API shape may differ from public docs. Isolated behind single function for easy replacement after live testing.
+- **Error Handling Coverage:** Connector tests cover 403 permission denied, 404 not found, 429 rate limit (with retry-after), malformed JSON response, replay idempotency. Adapter tests cover dry-run, real delegation success, API errors, isolation result validation.
+
+**Key file paths:**
+- `scripts/loop/connectors/github.mjs` — GitHub REST API connector with injected fetch
+- `scripts/loop/delegates/index.mjs` — backend-neutral delegation interface and helpers
+- `scripts/loop/delegates/github-copilot.mjs` — GitHub Copilot adapter (dry-run default)
+- `scripts/loop/isolation/worktree.mjs` — git worktree manager with injected exec/fs
+- `tests/unit/loop/github-connector.test.mjs` — connector contract tests (23 tests)
+- `tests/unit/loop/delegation.test.mjs` — delegation interface tests (31 tests)
+- `tests/unit/loop/github-copilot-adapter.test.mjs` — adapter tests (18 tests)
+- `tests/unit/loop/worktree.test.mjs` — worktree integration tests (31 tests)
+
+**API Coverage:**
+- **Reads:** issues (get/list), labels, PRs (get/list), PR reviews, check runs, workflow runs, workflow run logs URL
+- **Writes:** update issue (body/labels), create comment, create issue, assign Copilot to issue
+- **Delegation:** complete dry-run payload with source, objective, paths, limits, verification, escalation; formatted markdown comment for issue
+
+**Test Results:**
+- 241 total tests passing (138 Phase 2 + 103 Phase 3)
+- Lint: clean
+- Build: successful (dist/ generated)
+- Phase 3 acceptance criteria met:
+  - Connector/adapter contract tests cover success, permission failure, rate limiting, replay, malformed responses ✓
+  - Dry-run output is complete enough for human approval ✓
+  - Worktree integration tests create, reuse, and safely remove isolated worktrees ✓
+
+**BLOCKER for L2 Rollout:**
+- **Copilot Assignment API Shape:** The exact API endpoint, bot username/login, and assignment mechanism for GitHub Copilot coding agent needs live verification. Current implementation uses REST API with `assignees: ["copilot"]` based on public docs, but may require GraphQL mutation, different bot login, or org-specific installation lookup. Must be verified in manual bootstrap probe before enabling L2 delegation.
+
+**Next Phase (Phase 4):**
+- Skills: project-specific `.github/skills/*/SKILL.md` files with Keystone commands, label rules, risk paths
+- Custom agents: loop-implementer and loop-verifier (independent checker cannot edit production)
+- Hooks: `preToolUse` policy (protected paths, destructive commands), `agentStop` verification (deterministic checks before completion)
+
