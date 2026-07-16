@@ -1,0 +1,33 @@
+{
+  "workflow_run": {
+    "id": 1234567892,
+    "name": "CI",
+    "head_branch": "feature/flaky-test",
+    "head_sha": "flake123456",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/beniclark/keystone-ltd/actions/runs/1234567892",
+    "created_at": "2026-07-15T16:00:00Z",
+    "updated_at": "2026-07-15T16:08:00Z",
+    "event": "pull_request"
+  },
+  "jobs": [
+    {
+      "name": "test",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Run unit tests",
+          "conclusion": "failure"
+        }
+      ]
+    }
+  ],
+  "logs": "Error: Timeout of 5000ms exceeded. For async tests and hooks, ensure done() is called\nat timeout.test.js:45:12\nECONNREFUSED: Connection refused",
+  "repository": {
+    "name": "keystone-ltd",
+    "owner": {
+      "login": "beniclark"
+    }
+  }
+}

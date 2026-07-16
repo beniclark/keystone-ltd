@@ -1,0 +1,48 @@
+{
+  "action": "synchronize",
+  "pull_request": {
+    "number": 130,
+    "title": "Fix lint errors in NewFeature component",
+    "state": "open",
+    "draft": false,
+    "user": {
+      "login": "loop-bot[bot]",
+      "type": "Bot"
+    },
+    "labels": [
+      {
+        "name": "loop:managed"
+      }
+    ],
+    "changed_files": 2,
+    "created_at": "2026-07-15T17:00:00Z",
+    "updated_at": "2026-07-15T17:30:00Z",
+    "head": {
+      "ref": "loop/fix/lint-newfeature",
+      "sha": "fix123456"
+    },
+    "base": {
+      "ref": "main"
+    },
+    "html_url": "https://github.com/beniclark/keystone-ltd/pull/130"
+  },
+  "reviews": [],
+  "checks": [
+    {
+      "name": "CI",
+      "status": "in_progress",
+      "conclusion": null
+    }
+  ],
+  "conversations": [],
+  "linkedIssue": {
+    "number": 128,
+    "state": "open"
+  },
+  "repository": {
+    "name": "keystone-ltd",
+    "owner": {
+      "login": "beniclark"
+    }
+  }
+}

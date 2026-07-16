@@ -1,0 +1,33 @@
+{
+  "workflow_run": {
+    "id": 1234567891,
+    "name": "CI",
+    "head_branch": "feature/new-feature",
+    "head_sha": "xyz789abc456",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/beniclark/keystone-ltd/actions/runs/1234567891",
+    "created_at": "2026-07-15T15:00:00Z",
+    "updated_at": "2026-07-15T15:05:00Z",
+    "event": "pull_request"
+  },
+  "jobs": [
+    {
+      "name": "lint",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Run ESLint",
+          "conclusion": "failure"
+        }
+      ]
+    }
+  ],
+  "logs": "error: 'unused' is defined but never used  eslint(no-unused-vars)\nat src/components/NewFeature.jsx:12:7",
+  "repository": {
+    "name": "keystone-ltd",
+    "owner": {
+      "login": "beniclark"
+    }
+  }
+}

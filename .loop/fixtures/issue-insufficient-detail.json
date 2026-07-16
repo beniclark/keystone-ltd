@@ -1,0 +1,23 @@
+{
+  "action": "opened",
+  "issue": {
+    "number": 126,
+    "title": "Add dark mode support",
+    "body": "It would be nice to have dark mode.",
+    "state": "open",
+    "user": {
+      "login": "contributor",
+      "type": "User"
+    },
+    "labels": [],
+    "created_at": "2026-07-15T13:00:00Z",
+    "updated_at": "2026-07-15T13:00:00Z",
+    "html_url": "https://github.com/beniclark/keystone-ltd/issues/126"
+  },
+  "repository": {
+    "name": "keystone-ltd",
+    "owner": {
+      "login": "beniclark"
+    }
+  }
+}
