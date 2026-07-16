@@ -1,0 +1,96 @@
+name: Loop - CI Sweeper
+
+# Triggers when the CI workflow completes with failure
+# Fingerprints failures and proposes bounded fixes in L1 mode
+on:
+  workflow_run:
+    workflows: ["CI"]  # Exact name from ci.yml
+    types: [completed]
+  
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      workflow-run-id:
+        description: 'Workflow run ID to process (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+# Prevent concurrent runs per workflow run
+concurrency:
+  group: loop-ci-sweeper-${{ github.event.workflow_run.id || inputs.workflow-run-id || 'manual' }}
+  cancel-in-progress: false
+
+jobs:
+  check-failure:
+    name: Check if CI failed
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
+      run-id: ${{ steps.check.outputs.run-id }}
+    
+    steps:
+      - name: Check conclusion
+        id: check
+        run: |
+          conclusion="${{ github.event.workflow_run.conclusion || 'unknown' }}"
+          run_id="${{ github.event.workflow_run.id || inputs.workflow-run-id || '' }}"
+          
+          echo "Workflow conclusion: $conclusion"
+          echo "Workflow run ID: $run_id"
+          
+          if [[ "$conclusion" == "failure" ]]; then
+            echo "should-run=true" >> $GITHUB_OUTPUT
+            echo "run-id=$run_id" >> $GITHUB_OUTPUT
+            echo "CI failed — will run sweeper"
+          else
+            echo "should-run=false" >> $GITHUB_OUTPUT
+            echo "CI did not fail — skipping sweeper"
+          fi
+
+  check-pause:
+    name: Check if loop is paused
+    needs: check-failure
+    if: needs.check-failure.outputs.should-run == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      paused: ${{ steps.check.outputs.paused }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Check pause state
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if loop:paused label exists on state issue
+          # For now, default to not paused (full implementation in Phase 2-4)
+          echo "paused=false" >> $GITHUB_OUTPUT
+
+  run-ci-sweeper:
+    name: CI Sweeper
+    needs: [check-failure, check-pause]
+    if: needs.check-failure.outputs.should-run == 'true' && needs.check-pause.outputs.paused != 'true'
+    uses: ./.github/workflows/loop-run.yml
+    with:
+      loop-name: 'ci-sweeper'
+      dry-run: true
+      mode: 'l1'
+      source-ref: ${{ needs.check-failure.outputs.run-id }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

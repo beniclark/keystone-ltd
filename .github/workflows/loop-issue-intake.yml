@@ -1,0 +1,71 @@
+name: Loop - Issue Intake
+
+# Triggers on issue events and conservative scheduled reconciliation
+# Runs the issue-intake loop pattern to triage, score, and propose actions
+on:
+  issues:
+    types: [opened, reopened, edited]
+  
+  # Weekday mornings at 9 AM UTC (conservative reconciliation)
+  # Chosen to catch overnight issues without excessive runs
+  schedule:
+    - cron: '0 9 * * 1-5'
+  
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      issue-number:
+        description: 'Issue number to process (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+# Prevent concurrent runs; queue new runs instead of canceling
+concurrency:
+  group: loop-issue-intake-${{ github.event.issue.number || 'scheduled' }}
+  cancel-in-progress: false
+
+jobs:
+  check-pause:
+    name: Check if loop is paused
+    runs-on: ubuntu-latest
+    outputs:
+      paused: ${{ steps.check.outputs.paused }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Check pause state
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if loop:paused label exists on state issue
+          # For now, default to not paused (full implementation in Phase 2-4)
+          echo "paused=false" >> $GITHUB_OUTPUT
+
+  run-issue-intake:
+    name: Issue Intake
+    needs: check-pause
+    if: needs.check-pause.outputs.paused != 'true'
+    uses: ./.github/workflows/loop-run.yml
+    with:
+      loop-name: 'issue-intake'
+      dry-run: true
+      mode: 'l1'
+      source-ref: ${{ github.event.issue.number || inputs.issue-number || 'reconciliation' }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
