@@ -208,3 +208,40 @@
 
 
 
+
+### Phase 6: L2 Graduation Double-Gate (2026-07-16)
+
+**Context:** Implemented L2 graduation eligibility logic with feature-flagged delegation controls. Phase 5 left all loops in L1 report-only mode; Phase 6 adds the capability to graduate to L2 (verified draft PRs) but keeps it OFF by default with TWO independent safety gates.
+
+**What worked:**
+- **Fail-closed design pattern** — every eligibility check defaults to "not eligible" for missing/ambiguous data. This pattern made the logic robust and testable across all edge cases.
+- **Double-gate enforcement** — requiring BOTH mode=L2 AND allowLiveDelegation=true prevents accidental live delegation even if config is partially modified. Each gate can be independently controlled.
+- **Per-loop mode overrides** — allows surgical rollout (e.g., ciSweeper=L2 while issueIntake stays L1) without touching workflows or policies. Config-driven, no code changes needed.
+- **Fixture-driven test design** — graduation fixtures (safe lint-fix, P0, L1 mode, budget exhausted, protected path, max PRs) served as both test data and living documentation of graduation scenarios.
+- **Explicit NEEDS_LIVE_VERIFICATION caveat** — documented the unverified GitHub API shape prominently in code, tests, and LOOP.md. This prevents premature live-delegation rollout and sets clear expectations.
+
+**What was tricky:**
+- **Adapter test updates for double-gate** — existing Phase 3 tests assumed `dryRun: false` would enable real delegation. Had to update constructor calls to pass `allowLiveDelegation: true` when testing live mode. The double-gate adds an extra layer of config that wasn''t present in Phase 3.
+- **Test import path resolution** — new test files initially used `../../scripts/` but Vitest config expects `../../../scripts/` (three levels up from `tests/unit/loop/`). Caught by import-analysis plugin.
+- **Protected path pattern matching** — policy.json has exact patterns like `src/lib/auth.js`, not wildcard `**/*auth*`. Tests needed to match actual policy patterns, not assumed ones. Checking policy.json directly before writing tests would have avoided this.
+- **Fixture loop-name selection** — P0 fixture initially used `issueIntake` (L1 in fixture config), so graduation failed on mode check before category check. Moving to `ciSweeper` (L2) let the test validate category-based denial as intended.
+
+**API design decisions:**
+- **`getEffectiveMode(config, loopName)`** — pure function, fail-closed. Returns per-loop override if present, else global mode, else L1. Backward-compatible with Phase 2-5 configs (no `loops` field).
+- **`allowsLiveDelegation(config)`** — strict boolean check (`=== true`). Defaults to false for missing field or non-boolean values.
+- **`isEligibleForL2(options)`** — single options object parameter, returns `{ eligible, reason, effectiveMode }`. Reason string is human-readable for CLI reporting.
+- **Safe category allowlist** — lint-fix, type-fix, mechanical-ci-fix, deterministic-test-fix. All others (including unknown categories) fail closed. P0/P1/security/auth/dependency/infrastructure are explicitly human-required.
+- **Budget checks** — separate `checkBudget()` function returns `{ allowed, reason }`. Reason string explains which limit was hit.
+
+**Key contract:**
+Phase 6 adds L2 graduation capability WITHOUT changing Phase 5 behavior. Default config keeps all loops L1 and allowLiveDelegation false. This means:
+- Existing Phase 5 behavior is unchanged (all loops report-only)
+- L2 can be enabled per-loop via config (no code changes, no workflow changes)
+- Live delegation requires TWO explicit config changes (mode=L2 AND allowLiveDelegation=true)
+- NEEDS_LIVE_VERIFICATION documented: API shape unverified, requires manual GitHub testing before production use
+
+**Team impact:**
+- Danny can now enable L2 for specific loops via `.loop/config.json` without touching workflows
+- Livingston''s test coverage expands to 412 tests (added 52 graduation tests)
+- No Squad coordination needed — loop system is independent of `.squad/` conventions
+- Rollback is config-only: set mode back to L1 or allowLiveDelegation to false
