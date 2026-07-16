@@ -10,6 +10,16 @@
 
 ## Learnings
 
+## Core Context — Phases 1-4 (Baseline & Infrastructure)
+
+**Phase 1 (Loop Engineering Baseline):** Established deterministic verification infrastructure. Chose Vitest (ESM support) for unit tests, Playwright for E2E. Set up CI workflow with lint+typecheck+test+build jobs. Added branch protection bootstrap helper script. Stub loop CLI at `scripts/loop/cli.mjs`.
+
+**Phase 2 (Loop Contracts & Policy):** Built `.loop/config.json` and `.loop/policy.json` with JSON Schema validation. Implemented idempotency module (stable SHA256 keys for events/sources/failures/delegations), state ledger parser (GitHub issue with marker-delimited JSON block), budget module (attempts/concurrent PR limits, pause kill-switch). Comprehensive unit tests with mock GitHub data. Phase 2 prerequisite: 138 tests passing.
+
+**Phase 3 (GitHub Connector & Isolation):** Implemented GitHubConnector with injected fetch (zero live API in tests). Created GitHubCopilotAdapter with dry-run-by-default mode (explicit opt-in for real delegation). Built WorktreeManager for isolated branch clones with injected exec/fs. All tests use mock transports. CAVEAT: Copilot assignment API shape unverified — requires live testing.
+
+**Phase 4 (Skills & Hooks):** Created 7 SKILL.md files with Keystone context, label rules, protected paths. Implemented loop-implementer and loop-verifier agents. Built policy hooks (pre-tool-use denies protected paths/destructive commands) and verification hook (agent-stop-verify blocks on test/lint/build failure). 38 hook tests, fail-closed design, injection-friendly.
+
 ### Team Sync: Phase 5-6 Concurrent Development (2026-07-16)
 
 📌 **Rusty completed Phase 5 patterns (pure evaluation functions) and Phase 6 L2 graduation gates (double-gate design) — All 463 tests passing. CLI can now execute patterns when live. No changes needed to workflows/CLI for L2 integration; graduation eligibility is already enforced at adapter level.**

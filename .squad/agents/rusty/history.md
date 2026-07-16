@@ -10,9 +10,31 @@
 
 ## Learnings
 
-- Session started 2026-04-15. Backend doesn't exist yet — all work is greenfield. Vite proxy config needed for /api/* routes.
+# Rusty — Project History
 
-### Loop Engineering Phase 2 (2026-07-16)
+## Project Context
+
+- **Project:** Keystone Financial (keystone-ltd) — a financial services demo website
+- **Stack:** React 19, Vite 8, Tailwind CSS 4.2 (frontend). Backend planned: Express + better-sqlite3 + JWT.
+- **User:** beclark
+- **Repo:** https://github.com/github.com/beniclark/keystone-ltd
+- **Current state:** Frontend-only. All data is hardcoded in components. Backend work covers GitHub issues #1-#8 (server setup, seed script, API routes, API client, auth rewrite, form updates, data hooks, profile updates).
+
+## Learnings
+
+## Core Context — Phase 2-4 (Loop Contracts, Connectors, & Infrastructure)
+
+**Phase 2 (Loop Contracts & Policy):** Built core loop modules: idempotency (SHA256 fingerprinting for events/sources/failures), state ledger (GitHub issue with marker-delimited JSON), budget enforcement (max attempts/concurrent PRs), pause kill-switch. Comprehensive unit tests (138 total). Fail-closed policy: JSON Schema validation, explicit allow lists, missing params trigger escalation.
+
+**Phase 3 (GitHub Connector & Isolation):** Implemented GitHubConnector with injected fetch (zero live API in tests), GitHubCopilotAdapter with dry-run-by-default, WorktreeManager for isolated branches. All transports injectable for deterministic testing. Phase 3 prerequisite: 241 tests passing. CAVEAT: Copilot assignment API shape unverified.
+
+**Phase 4 (Skills & Hooks):** Created loop-implementer/loop-verifier agents with fail-closed policy hooks (protected paths, destructive commands) and verification hooks (test/lint/build gates). Maker-checker separation: implementer cannot mark itself verified. All hooks injection-friendly, 38 unit tests.
+
+### Team Sync: Phase 5 Workflow/CLI Concurrent Work (2026-07-16)
+
+📌 **Danny completed Phase 5 workflow orchestration (loop-run.yml reusable pattern, 3 individual workflows with conservative schedules, CLI with defensive pattern imports) — CLI safely handles incomplete pattern modules during concurrent development. Patterns now integrate seamlessly with workflow execution. No API changes between workflows and patterns.**
+
+### Loop Engineering Phase 5 (2026-07-16)
 
 **Context:** Implemented Phase 2 of Repository-Owned Loop Engineering system — contracts, policy, budgets, and state management.
 
