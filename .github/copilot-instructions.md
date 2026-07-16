@@ -3,13 +3,26 @@
 ## Commands
 
 ```bash
-npm run dev      # Vite dev server at localhost:5173
-npm run build    # Production build to dist/
-npm run lint     # ESLint (flat config, JS/JSX only)
-npm run preview  # Preview production build
+npm run dev          # Vite dev server at localhost:5173
+npm run build        # Production build to dist/
+npm run lint         # ESLint (flat config, JS/JSX only)
+npm run typecheck    # TypeScript type checking (staged JS)
+npm run test:unit    # Vitest unit tests
+npm run test:e2e     # Playwright E2E browser tests
+npm run verify       # Run lint + typecheck + test:unit + build
+npm run verify:full  # Run verify + test:e2e (full verification)
+npm run preview      # Preview production build
 ```
 
-No test framework is configured.
+### Loop Commands
+
+```bash
+npm run loop            # Run loop patterns (production)
+npm run loop:doctor     # Validate loop config, policy, state, and environment
+npm run loop:dry-run    # Simulate loop actions without GitHub writes
+```
+
+Loop commands invoke `scripts/loop/cli.mjs`. Use `loop:doctor` to check configuration validity and `loop:dry-run` to preview actions before enabling L2 mode.
 
 ## Architecture
 
@@ -18,6 +31,27 @@ Single-page React 19 app using Vite 8 and Tailwind CSS v4. Client-side routing v
 **Auth** is localStorage-based (`keystoneUser` key). `src/lib/auth.js` handles login/signup/logout and dispatches a custom `keystone-auth` event. The `useAuth` hook subscribes to both that event and `storage` to stay in sync across tabs.
 
 **Data** is entirely static mock data in `src/data/`. There is no API layer or backend. Components import named exports directly from data files.
+
+### Test Locations
+
+- `src/**/__tests__/**` — Unit and component tests (Vitest + React Testing Library)
+- `tests/unit/loop/**` — Loop runtime unit tests (core, connectors, hooks)
+- `e2e/**` — Playwright browser tests (Chromium smoke paths)
+
+### Loop Engineering
+
+This repository uses **loop engineering** for automated issue intake, CI failure sweeping, and PR babysitting.
+
+**All mutable loop state lives in the GitHub issue labeled `loop:state`, not in repository files.**
+
+Loop configuration, policy, and schemas are versioned in `.loop/` and `scripts/loop/`. The loop runtime enforces:
+- Max 3 attempts per source item/failure fingerprint
+- Max 5 changed files per automated fix
+- Max 2 concurrent loop-created PRs
+- No auto-merge (human approval always required)
+- Protected paths require human gate (`.github/workflows/**`, `.github/hooks/**`, `.loop/**`, `package.json`, `src/lib/auth.js`)
+
+See `LOOP.md` for operating guide and `npm run loop:doctor` for configuration validation.
 
 ## Key Conventions
 

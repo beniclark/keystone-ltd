@@ -1,0 +1,24 @@
+{
+  "$schema": "https://docs.github.com/copilot/schemas/hooks/0.0.1/agentStop.schema.json",
+  "version": "0.0.1",
+  "hookName": "loop-verify",
+  "description": "Deterministic local verification before agent stop. Runs lint, typecheck, test:unit, and build. Blocks completion on failure.",
+  "trigger": {
+    "type": "agentStop"
+  },
+  "handler": {
+    "type": "script",
+    "script": "../../scripts/loop/hooks/agent-stop-verify.mjs"
+  },
+  "metadata": {
+    "requiredCommands": [
+      "npm run lint",
+      "npm run typecheck",
+      "npm run test:unit",
+      "npm run build"
+    ],
+    "failOnError": true,
+    "skipE2E": true,
+    "note": "Full E2E verification (npm run test:e2e) runs in required CI job, not during local agent stop."
+  }
+}
