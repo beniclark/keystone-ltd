@@ -1,0 +1,82 @@
+{
+  "$schema": "./schemas/policy.schema.json",
+  "schemaVersion": "1.0.0",
+  "maxAttempts": 3,
+  "maxChangedFiles": 5,
+  "maxConcurrentPRs": 2,
+  "maxConcurrentDelegations": 1,
+  "autoMerge": false,
+  "protectedPaths": [
+    ".env*",
+    "**/.env*",
+    "**/secrets/**",
+    "**/credentials/**",
+    "**/*key*",
+    "**/*secret*",
+    ".github/workflows/**",
+    ".github/hooks/**",
+    ".loop/**",
+    "package.json",
+    "package-lock.json",
+    "src/lib/auth.js",
+    "src/lib/auth.ts",
+    "**/migrations/**",
+    "**/db/migrations/**"
+  ],
+  "humanGatePaths": [
+    ".github/workflows/**",
+    ".github/hooks/**",
+    ".loop/**",
+    "package.json",
+    "package-lock.json",
+    "**/*auth*",
+    "**/*session*",
+    "**/migrations/**",
+    "**/*.sql"
+  ],
+  "allowedActions": {
+    "L1": [
+      "read",
+      "report",
+      "label:loop:*",
+      "comment:state-ledger"
+    ],
+    "L2": [
+      "read",
+      "report",
+      "label:loop:*",
+      "label:P*",
+      "label:type:*",
+      "label:area:*",
+      "comment:state-ledger",
+      "comment:bounded-guidance",
+      "create:bounded-fix-issue",
+      "assign:copilot",
+      "pr:draft"
+    ]
+  },
+  "deniedActions": [
+    "merge",
+    "close:issue",
+    "close:pr",
+    "delete:branch",
+    "force-push",
+    "workflow:modify",
+    "policy:modify"
+  ],
+  "escalationRules": {
+    "sensitiveLabels": [
+      "security",
+      "auth",
+      "P0: critical",
+      "P1: high"
+    ],
+    "blockedPatterns": [
+      "architecture change",
+      "breaking change",
+      "database migration",
+      "dependency update",
+      "infrastructure"
+    ]
+  }
+}

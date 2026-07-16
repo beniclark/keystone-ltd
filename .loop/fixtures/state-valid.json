@@ -1,0 +1,65 @@
+{
+  "version": 42,
+  "lastUpdated": "2026-07-16T01:00:00Z",
+  "status": "active",
+  "sourceItems": {
+    "issue-123": {
+      "kind": "issue",
+      "number": 123,
+      "status": "running",
+      "attempts": 1,
+      "firstSeen": "2026-07-15T10:00:00Z",
+      "lastAttempt": "2026-07-16T00:30:00Z",
+      "fingerprint": "sha256:abc123def456789",
+      "activeDelegation": "deleg-issue-123-run-42"
+    },
+    "issue-125": {
+      "kind": "issue",
+      "number": 125,
+      "status": "human-required",
+      "attempts": 3,
+      "firstSeen": "2026-07-14T09:00:00Z",
+      "lastAttempt": "2026-07-15T18:00:00Z",
+      "fingerprint": "sha256:def456abc789012",
+      "activeDelegation": null
+    },
+    "pr-124": {
+      "kind": "pull_request",
+      "number": 124,
+      "status": "verified",
+      "attempts": 1,
+      "firstSeen": "2026-07-15T11:00:00Z",
+      "fingerprint": "sha256:789012def456abc",
+      "activeDelegation": null
+    }
+  },
+  "delegations": {
+    "deleg-issue-123-run-42": {
+      "sourceKey": "issue-123",
+      "backend": "github-copilot",
+      "status": "running",
+      "createdAt": "2026-07-16T00:30:00Z"
+    },
+    "deleg-issue-123-run-38": {
+      "sourceKey": "issue-123",
+      "backend": "github-copilot",
+      "status": "failed",
+      "createdAt": "2026-07-15T12:00:00Z",
+      "completedAt": "2026-07-15T12:45:00Z"
+    }
+  },
+  "metrics": {
+    "discovered": 15,
+    "noOp": 3,
+    "proposed": 10,
+    "delegated": 8,
+    "verified": 5,
+    "blocked": 1,
+    "escalated": 3,
+    "duplicatePrevention": 12
+  },
+  "openPRs": [124, 126],
+  "cooldowns": {
+    "issue-125": "2026-07-16T18:00:00Z"
+  }
+}

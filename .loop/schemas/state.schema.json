@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://keystone-ltd.example/schemas/state.schema.json",
+  "title": "Loop State Schema",
+  "description": "Machine-readable state block for loop ledger",
+  "type": "object",
+  "required": [
+    "version",
+    "lastUpdated",
+    "status",
+    "sourceItems",
+    "delegations",
+    "metrics"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "lastUpdated": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "paused"]
+    },
+    "sourceItems": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["kind", "number", "status", "attempts", "firstSeen"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["issue", "pull_request", "workflow_run"]
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "queued", "running", "blocked", "verified", "human-required"]
+          },
+          "attempts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "firstSeen": {
+            "type": "string"
+          },
+          "lastAttempt": {
+            "type": "string"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "activeDelegation": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "delegations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["sourceKey", "backend", "status", "createdAt"],
+        "properties": {
+          "sourceKey": {
+            "type": "string"
+          },
+          "backend": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "running", "completed", "failed"]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "completedAt": {
+            "type": "string"
+          },
+          "resultPR": {
+            "type": "integer"
+          },
+          "resultBranch": {
+            "type": "string"
+          },
+          "verificationStatus": {
+            "type": "string",
+            "enum": ["pending", "passed", "failed"]
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "discovered",
+        "noOp",
+        "proposed",
+        "delegated",
+        "verified",
+        "blocked",
+        "escalated"
+      ],
+      "properties": {
+        "discovered": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "noOp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "proposed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "delegated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "verified": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "escalated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicatePrevention": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "openPRs": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "cooldowns": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

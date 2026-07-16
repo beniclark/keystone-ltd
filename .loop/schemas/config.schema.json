@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://keystone-ltd.example/schemas/config.schema.json",
+  "title": "Loop Configuration Schema",
+  "description": "Configuration for repository-owned loop engineering system",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "mode",
+    "watchedBranches",
+    "cadence",
+    "labels",
+    "adapter",
+    "actionCaps"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["L1", "L2"]
+    },
+    "watchedBranches": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "cadence": {
+      "type": "object",
+      "required": [
+        "issueReconciliation",
+        "prReconciliation",
+        "ciReconciliation"
+      ],
+      "properties": {
+        "issueReconciliation": {
+          "type": "string"
+        },
+        "prReconciliation": {
+          "type": "string"
+        },
+        "ciReconciliation": {
+          "type": "string"
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "required": [
+        "state",
+        "paused",
+        "managed",
+        "queued",
+        "running",
+        "blocked",
+        "humanRequired",
+        "verified"
+      ],
+      "properties": {
+        "state": {
+          "type": "string"
+        },
+        "paused": {
+          "type": "string"
+        },
+        "managed": {
+          "type": "string"
+        },
+        "queued": {
+          "type": "string"
+        },
+        "running": {
+          "type": "string"
+        },
+        "blocked": {
+          "type": "string"
+        },
+        "humanRequired": {
+          "type": "string"
+        },
+        "verified": {
+          "type": "string"
+        },
+        "priorities": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "required": ["backend", "dryRun"],
+      "properties": {
+        "backend": {
+          "type": "string"
+        },
+        "dryRun": {
+          "type": "boolean"
+        }
+      }
+    },
+    "actionCaps": {
+      "type": "object",
+      "properties": {
+        "issueIntake": {
+          "type": "object",
+          "properties": {
+            "maxLabelsPerRun": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maxCommentsPerRun": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "allowAutoClose": {
+              "type": "boolean"
+            }
+          }
+        },
+        "ciSweeper": {
+          "type": "object",
+          "properties": {
+            "maxFixIssuesPerRun": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maxAssignmentsPerRun": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "prBabysitter": {
+          "type": "object",
+          "properties": {
+            "maxLabelsPerRun": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maxCommentsPerRun": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "allowAutoRebase": {
+              "type": "boolean"
+            },
+            "allowAutoMerge": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "action": "submitted",
+  "review": {
+    "id": 987654321,
+    "user": {
+      "login": "reviewer",
+      "type": "User"
+    },
+    "body": "LGTM after addressing the auth event timing issue. The fix looks solid.",
+    "state": "approved",
+    "html_url": "https://github.com/beniclark/keystone-ltd/pull/124#pullrequestreview-987654321",
+    "submitted_at": "2026-07-15T16:00:00Z"
+  },
+  "pull_request": {
+    "number": 124,
+    "title": "Fix: Auth redirect timing after logout",
+    "state": "open",
+    "draft": false,
+    "user": {
+      "login": "loop-bot[bot]",
+      "type": "Bot"
+    },
+    "labels": [
+      {
+        "name": "loop:managed"
+      },
+      {
+        "name": "P2: medium"
+      }
+    ],
+    "created_at": "2026-07-15T11:00:00Z",
+    "updated_at": "2026-07-15T16:00:00Z",
+    "head": {
+      "ref": "loop/fix/issue-123-run-42",
+      "sha": "def789abc012"
+    },
+    "base": {
+      "ref": "main"
+    },
+    "html_url": "https://github.com/beniclark/keystone-ltd/pull/124"
+  },
+  "repository": {
+    "name": "keystone-ltd",
+    "owner": {
+      "login": "beniclark"
+    }
+  }
+}
