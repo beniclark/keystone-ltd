@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { formatCurrency, formatNumber } from '../../data/options/helpers.js'
 
@@ -15,7 +15,7 @@ export default function StockInfoBanner({ stock }) {
       : 50
 
   return (
-    <motion.div
+    <div
       className="bg-white rounded-2xl border border-slate-200 p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -77,6 +77,6 @@ export default function StockInfoBanner({ stock }) {
           </p>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

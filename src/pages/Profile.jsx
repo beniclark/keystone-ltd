@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { BarChart3, CalendarClock, MessageCircle, Wallet, Briefcase, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth.js'
 import Button from '../components/Button.jsx'
@@ -30,7 +30,7 @@ export default function Profile() {
     <div className="bg-slate-50/60 min-h-[calc(100vh-4rem)]">
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-10">
         {/* HEADER */}
-        <motion.div
+        <div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -57,10 +57,10 @@ export default function Profile() {
               <CalendarClock size={16} /> Schedule review
             </Button>
           </div>
-        </motion.div>
+        </div>
 
         {/* NET WORTH + ALLOCATION */}
-        <motion.div
+        <div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.05 }}
@@ -72,7 +72,7 @@ export default function Profile() {
           <div className="lg:col-span-2">
             <AllocationDonut data={mockUser.allocation} />
           </div>
-        </motion.div>
+        </div>
 
         {/* INVESTMENT ACCOUNTS */}
         <Section
@@ -138,14 +138,14 @@ export default function Profile() {
         </Section>
 
         {/* ACTIVITY */}
-        <motion.div
+        <div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.5 }}
         >
           <ActivityTable activity={recentActivity} />
-        </motion.div>
+        </div>
 
         {/* ADVISOR CTA */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-800 via-navy-700 to-navy-800 p-8 md:p-12 text-white">
@@ -181,9 +181,9 @@ export default function Profile() {
 const currency = (n) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 
-function Section({ icon: Icon, eyebrow, title, description, totalLabel, total, children }) {
+function Section({ icon: _Icon, eyebrow, title, description, totalLabel, total, children }) {
   return (
-    <motion.section
+    <section
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
@@ -213,6 +213,6 @@ function Section({ icon: Icon, eyebrow, title, description, totalLabel, total, c
         )}
       </div>
       {children}
-    </motion.section>
+    </section>
   )
 }

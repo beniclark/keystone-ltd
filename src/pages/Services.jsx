@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import {
   TrendingUp,
   Target,
@@ -80,7 +80,7 @@ export default function Services() {
             const Icon = iconMap[svc.icon] || TrendingUp
             const reverse = i % 2 === 1
             return (
-              <motion.div
+              <div
                 key={svc.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -132,7 +132,7 @@ export default function Services() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )
           })}
         </div>

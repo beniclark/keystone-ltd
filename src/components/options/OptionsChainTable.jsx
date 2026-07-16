@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import StrikeRow from './StrikeRow.jsx'
 
 const CALL_HEADERS = ['Last', 'Chg', 'Bid', 'Ask', 'Vol', 'IV', 'Δ', 'Γ']
@@ -12,10 +12,10 @@ export default function OptionsChainTable({ chain, stockPrice, strategy }) {
 
   const callCols = showCalls ? 8 : 0
   const putCols = showPuts ? 8 : 0
-  const totalCols = callCols + 1 + putCols
+  const _totalCols = callCols + 1 + putCols
 
   return (
-    <motion.div
+    <div
       className="bg-white rounded-2xl border border-slate-200 overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -83,6 +83,6 @@ export default function OptionsChainTable({ chain, stockPrice, strategy }) {
           </tbody>
         </table>
       </div>
-    </motion.div>
+    </div>
   )
 }

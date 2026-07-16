@@ -1,4 +1,4 @@
-import { formatCurrency, formatNumber, formatGreek, formatPercent, isInTheMoney } from '../../data/options/helpers.js'
+import { formatCurrency, formatNumber, formatGreek, formatPercent } from '../../data/options/helpers.js'
 
 function Cell({ children, className = '', align = 'right' }) {
   return (
@@ -12,7 +12,7 @@ function Cell({ children, className = '', align = 'right' }) {
   )
 }
 
-function ContractCells({ contract, changeColor }) {
+function ContractCells({ contract, changeColor: _changeColor }) {
   if (!contract) {
     return (
       <>

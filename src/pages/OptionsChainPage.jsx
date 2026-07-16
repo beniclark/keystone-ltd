@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { getStock } from '../data/options/stocks.js'
 import { getChain, getExpirations } from '../data/options/chains.js'
@@ -69,7 +69,7 @@ export default function OptionsChainPage() {
             <ArrowLeft size={16} />
             Back to Options
           </Link>
-          <motion.div
+          <div
             className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -83,7 +83,7 @@ export default function OptionsChainPage() {
                 Browse available stocks →
               </Link>
             </p>
-          </motion.div>
+          </div>
         </div>
       </div>
     )

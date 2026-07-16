@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown, ChevronRight } from 'lucide-react'
 import SectionHeading from '../components/SectionHeading.jsx'
 import { stocks } from '../data/options/stocks.js'
@@ -18,7 +18,7 @@ export default function OptionsLanding() {
   return (
     <div className="bg-slate-50/60 min-h-[calc(100vh-4rem)]">
       <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
-        <motion.div
+        <div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -28,7 +28,7 @@ export default function OptionsLanding() {
             title="Options Chain"
             description="Explore real-time options chains for popular stocks. View calls, puts, strike prices, and Greeks to inform your trading strategy."
           />
-        </motion.div>
+        </div>
 
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {stocks.map((stock, i) => {
@@ -37,7 +37,7 @@ export default function OptionsLanding() {
             const changeColor = isPositive ? 'text-[#047857]' : 'text-red-600'
 
             return (
-              <motion.div
+              <div
                 key={stock.ticker}
                 custom={i}
                 variants={cardVariants}
@@ -79,7 +79,7 @@ export default function OptionsLanding() {
                     View Chain →
                   </p>
                 </Link>
-              </motion.div>
+              </div>
             )
           })}
         </div>

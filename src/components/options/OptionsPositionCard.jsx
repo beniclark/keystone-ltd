@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight, ChevronDown, ChevronUp } from 'lucide-react'
 import StrategyBadge from './StrategyBadge.jsx'
@@ -27,7 +27,7 @@ export default function OptionsPositionCard({ position }) {
     : 'from-red-500/10 to-transparent'
 
   return (
-    <motion.div
+    <div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
@@ -101,6 +101,6 @@ export default function OptionsPositionCard({ position }) {
       <div className="relative mt-4 text-xs text-slate-400">
         Opened: {formatDate(position.openDate)}
       </div>
-    </motion.div>
+    </div>
   )
 }

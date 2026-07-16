@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import {
   TrendingUp,
   Target,
@@ -34,7 +34,7 @@ export default function Landing() {
 
         <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-32 md:pt-28 md:pb-40">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
-            <motion.div
+            <div
               className="lg:col-span-7"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -81,16 +81,16 @@ export default function Landing() {
                   <span className="ml-1.5">Trusted by 2.3M members</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
+            <div
               className="lg:col-span-5 relative"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             >
               <HeroCard />
-            </motion.div>
+            </div>
           </div>
         </div>
 
@@ -113,19 +113,19 @@ export default function Landing() {
       {/* SERVICES */}
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div {...fadeUp}>
+          <div {...fadeUp}>
             <SectionHeading
               eyebrow="What we do"
               title="One membership. Every part of your financial life."
               description="Invest, retire, and protect your family with a single plan and a real advisor — no spreadsheet gymnastics required."
             />
-          </motion.div>
+          </div>
 
           <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {services.map((svc, i) => {
               const Icon = iconMap[svc.icon] || TrendingUp
               return (
-                <motion.div
+                <div
                   key={svc.id}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -145,7 +145,7 @@ export default function Landing() {
                   <div className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-[#047857] group-hover:gap-2.5 transition-all">
                     Learn more <ArrowRight size={14} />
                   </div>
-                </motion.div>
+                </div>
               )
             })}
           </div>
@@ -155,17 +155,17 @@ export default function Landing() {
       {/* HOW IT WORKS */}
       <section className="py-24 md:py-32 bg-navy-50/50 border-y border-slate-200/70">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div {...fadeUp} className="text-center mx-auto">
+          <div {...fadeUp} className="text-center mx-auto">
             <SectionHeading
               center
               eyebrow="How it works"
               title="From signup to plan in under 10 minutes."
               description="A real advisor, a real plan — without the four-hour office visit."
             />
-          </motion.div>
+          </div>
           <div className="mt-16 grid md:grid-cols-3 gap-6">
             {steps.map((step, i) => (
-              <motion.div
+              <div
                 key={step.number}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -180,7 +180,7 @@ export default function Landing() {
                   {step.title}
                 </h3>
                 <p className="mt-3 text-slate-600 leading-relaxed">{step.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -189,15 +189,15 @@ export default function Landing() {
       {/* TESTIMONIALS */}
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div {...fadeUp}>
+          <div {...fadeUp}>
             <SectionHeading
               eyebrow="Members"
               title="The advice people wish they’d had sooner."
             />
-          </motion.div>
+          </div>
           <div className="mt-16 grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
-              <motion.blockquote
+              <blockquote
                 key={t.name}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -230,7 +230,7 @@ export default function Landing() {
                     <div className="text-xs text-slate-500">{t.role}</div>
                   </div>
                 </footer>
-              </motion.blockquote>
+              </blockquote>
             ))}
           </div>
         </div>

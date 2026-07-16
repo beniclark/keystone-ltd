@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { Mail, Phone, MapPin, Heart, Scale, Users, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import Button from '../components/Button.jsx'
@@ -109,7 +109,7 @@ export default function About() {
           />
           <div className="mt-16 grid md:grid-cols-4 gap-6">
             {timeline.map((t, i) => (
-              <motion.div
+              <div
                 key={t.year}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -122,7 +122,7 @@ export default function About() {
                 </div>
                 <div className="mt-3 font-semibold text-navy-800">{t.title}</div>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">{t.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function About() {
           />
           <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {values.map((v, i) => (
-              <motion.div
+              <div
                 key={v.title}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -151,7 +151,7 @@ export default function About() {
                   {v.title}
                 </h3>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">{v.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function About() {
           <SectionHeading eyebrow="Leadership" title="The people steering the ship." />
           <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {leaders.map((p, i) => (
-              <motion.div
+              <div
                 key={p.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -181,7 +181,7 @@ export default function About() {
                 </div>
                 <div className="mt-5 font-semibold text-navy-800">{p.name}</div>
                 <div className="text-sm text-slate-500 mt-1">{p.title}</div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
