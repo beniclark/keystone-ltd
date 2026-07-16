@@ -48,6 +48,59 @@
 - Updated .github/copilot-instructions.md with loop commands, test locations, and state ledger rules
 - Wrote comprehensive unit tests for both hook scripts (38 tests total, 100% passing)
 
+### Phase 7 — Label Normalization and Squad Cutover (2026-07-16)
+
+**Context:** Implemented Phase 7 of loop engineering plan — label normalization, Squad workflow cutover preparation, and explicit non-dependency verification.
+
+**What was done:**
+1. Created versioned label map (`.loop/labels.json`) with JSON schema validation
+2. Implemented label sync script with dry-run/apply modes and fail-closed policy enforcement
+3. Integrated labels command into loop CLI (`node scripts/loop/cli.mjs labels`)
+4. Wrote 21 unit tests covering label map, sync, validation, and fail-closed behavior
+5. Added Phase 7 cutover comments to four Squad workflows but did NOT disable them
+6. Updated documentation (LOOP.md, copilot-instructions.md) with Phase 7 details
+7. Explicitly verified and documented that NO loop code depends on `.squad/` for decisions
+
+**Key decision — Squad workflow cutover:**
+The plan states: "In a dedicated cutover PR, disable or remove overlapping triggers from: squad-heartbeat.yml, squad-triage.yml, squad-issue-assign.yml, sync-squad-labels.yml after label migration is complete."
+
+I interpreted this as: DO NOT disable/delete workflows in Phase 7 itself. Instead, flag them with clear cutover comments and reserve the actual disablement for a future dedicated PR that requires explicit human approval.
+
+Reasoning:
+- Disabling Squad workflows is a significant behavior change affecting multi-system automation
+- The plan explicitly calls for a "dedicated cutover PR" (separate from Phase 7 implementation)
+- The plan's own guardrails require human approval for behavior changes like this
+- Shadow mode comparison is still valuable for validating loop behavior
+- Rollback is simpler if Squad workflows remain active and we just pause the loop
+
+This judgment call was made to respect the plan's explicit sequencing and the principle that major automation cutover requires its own deliberate PR and review.
+
+**Technical details:**
+- Canonical priority labels: `P0: critical`, `P1: high`, `P2: medium`, `P3: low`
+- Loop-owned labels: `loop:state`, `loop:paused`, `loop:managed`, `loop:queued`, `loop:running`, `loop:blocked`, `loop:human-required`, `loop:verified`
+- Deprecated mapping: `priority:p0` → `P0: critical`, `priority:p1` → `P1: high`, `priority:p2` → `P2: medium`
+- Label sync uses injectable transport (no real API calls in tests)
+- Fail-closed: requires valid policy before applying any changes
+
+**Verification:**
+- ✅ 433/433 tests passing (412 previous + 21 new)
+- ✅ Lint, typecheck, build all green
+- ✅ `.loop/labels.json` validates against schema
+- ✅ Confirmed via grep: NO loop code depends on `.squad/` (0 matches in scripts/loop/, .github/hooks/, .loop/)
+
+**Next steps:**
+- Run `node scripts/loop/cli.mjs labels --dry-run` to preview label changes
+- Verify no active workflow outside loop depends on `priority:p*` labels
+- Apply labels with `--apply` flag
+- Create dedicated cutover PR to disable Squad workflows (requires human review and approval)
+
+**What I learned:**
+- When a plan explicitly calls for a "dedicated cutover PR," that's a signal to NOT bundle cutover with implementation
+- Flagging workflows with detailed comments is better than silently disabling them
+- Explicit non-dependency verification (via grep) is valuable documentation for future maintainers
+- Label migration requires human verification even with dry-run mode
+- Shadow mode coexistence is a legitimate intermediate state, not a failure to complete cutover
+
 **Key Decisions:**
 - Skills reference canonical priority labels (P0-P3) used in team.md, not Squad's duplicate `priority:p*` labels
 - All mutable loop state lives in the GitHub issue labeled `loop:state`, not in repository files — documented in every skill
