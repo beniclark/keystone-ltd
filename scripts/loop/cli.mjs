@@ -1,10 +1,11 @@
 /**
  * Loop CLI - Repository-Owned Loop Engineering
- * Phase 5 implementation: workflow/CLI wiring for L1 report-only mode
+ * Phase 6 implementation: L2 graduation with double-gate reporting
  */
 
 import { loadConfig } from './core/config.mjs'
 import { loadPolicy } from './core/policy.mjs'
+import { isEligibleForL2 } from './core/graduation.mjs'
 import { createWorktreeManager } from './isolation/worktree.mjs'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
@@ -203,6 +204,39 @@ async function run(args) {
 
       console.log('\n=== Run Result ===')
       console.log(JSON.stringify(result, null, 2))
+
+      // Phase 6: Show L2 graduation eligibility
+      if (result.proposal) {
+        console.log('\n=== L2 Graduation Check ===')
+        
+        const graduation = isEligibleForL2({
+          config,
+          policy,
+          loopName: pattern,
+          proposal: result.proposal,
+          currentState: result.currentState || {}
+        })
+        
+        console.log(`Eligible for L2 delegation: ${graduation.eligible ? 'YES' : 'NO'}`)
+        console.log(`Effective mode: ${graduation.effectiveMode}`)
+        console.log(`Reason: ${graduation.reason}`)
+        
+        // Show double-gate status
+        if (graduation.eligible) {
+          const liveDelegationAllowed = config.allowLiveDelegation === true
+          console.log(`\nDouble-gate status:`)
+          console.log(`  1. Mode is L2: ✓`)
+          console.log(`  2. allowLiveDelegation: ${liveDelegationAllowed ? '✓' : '✗'}`)
+          
+          if (!liveDelegationAllowed) {
+            console.log(`\nReal delegation BLOCKED: config.allowLiveDelegation is false`)
+            console.log(`Delegation would run in dry-run mode (safe)`)
+          } else {
+            console.log(`\n⚠️  BOTH GATES OPEN: Real delegation would proceed`)
+            console.log(`   (Still respects adapter dryRun setting)`)
+          }
+        }
+      }
 
       // Exit before any model delegation if no changes (L1 rule)
       if (result.actions?.length === 0) {

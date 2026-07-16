@@ -2,6 +2,18 @@
   "$schema": "./schemas/config.schema.json",
   "schemaVersion": "1.0.0",
   "mode": "L1",
+  "allowLiveDelegation": false,
+  "loops": {
+    "issueIntake": {
+      "mode": "L1"
+    },
+    "ciSweeper": {
+      "mode": "L1"
+    },
+    "prBabysitter": {
+      "mode": "L1"
+    }
+  },
   "watchedBranches": [
     "main",
     "feature/options-chain"

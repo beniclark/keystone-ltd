@@ -76,11 +76,43 @@ export function resetConfigCache() {
 
 /**
  * Get current loop mode (L1 or L2)
+ * DEPRECATED: Use getEffectiveMode(config, loopName) for per-loop resolution
  * @param {object} config - Validated config object
- * @returns {string} - Loop mode
+ * @returns {string} - Global loop mode
  */
 export function getMode(config) {
   return config.mode
+}
+
+/**
+ * Get effective mode for a specific loop (per-loop override > global default)
+ * @param {object} config - Validated config object
+ * @param {string} loopName - Loop name (issueIntake, ciSweeper, prBabysitter)
+ * @returns {string} - Effective mode (L1 or L2)
+ */
+export function getEffectiveMode(config, loopName) {
+  if (!config || !loopName) {
+    return 'L1' // Fail closed
+  }
+  
+  // Check for per-loop override
+  const loopConfig = config.loops?.[loopName]
+  if (loopConfig?.mode) {
+    return loopConfig.mode
+  }
+  
+  // Fall back to global mode
+  return config.mode || 'L1'
+}
+
+/**
+ * Check if live delegation is allowed (second gate)
+ * Both mode=L2 AND allowLiveDelegation=true required for real delegation
+ * @param {object} config - Validated config object
+ * @returns {boolean} - True if live delegation is explicitly allowed
+ */
+export function allowsLiveDelegation(config) {
+  return config.allowLiveDelegation === true
 }
 
 /**

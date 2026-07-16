@@ -23,7 +23,46 @@
     },
     "mode": {
       "type": "string",
-      "enum": ["L1", "L2"]
+      "enum": ["L1", "L2"],
+      "description": "Global default mode — can be overridden per loop"
+    },
+    "allowLiveDelegation": {
+      "type": "boolean",
+      "description": "Explicit opt-in for non-dry-run delegation even when mode is L2. Both gates required for real delegation.",
+      "default": false
+    },
+    "loops": {
+      "type": "object",
+      "description": "Per-loop mode overrides (takes precedence over global mode)",
+      "properties": {
+        "issueIntake": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["L1", "L2"]
+            }
+          }
+        },
+        "ciSweeper": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["L1", "L2"]
+            }
+          }
+        },
+        "prBabysitter": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["L1", "L2"]
+            }
+          }
+        }
+      }
     },
     "watchedBranches": {
       "type": "array",

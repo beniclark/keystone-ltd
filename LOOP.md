@@ -92,7 +92,170 @@ CI will run on pull requests and require all checks to pass before merge (once b
 - GitHub Copilot delegation adapter
 - Local `git worktree` isolation manager
 
-### Phase 4: Skills, Agents, and Hooks
+### Phase 5: Issue Intake, CI Sweeper, PR Babysitter (L1 Report-Only)
+
+**Status:** ✅ Complete
+
+All three loops running in L1 report-only mode. Patterns evaluate issues, CI failures, and PR state, generate proposals, and write to the state ledger. No automated labels, comments, or delegations are performed.
+
+### Phase 6: L2 Graduation with Double-Gate Safety
+
+**Status:** ✅ Complete
+
+Implemented L2 graduation with feature-flagged delegation controls and fail-closed safety.
+
+#### What Is L2 Mode?
+
+**L1 (report-only):** Loops discover events, evaluate them, and write proposals to the state ledger. No automated actions are taken — everything is human-reviewed.
+
+**L2 (verified draft PRs):** Loops can delegate narrowly-scoped, low-risk changes to GitHub Copilot for automated implementation. L2 actions create draft PRs that still require CI verification, independent semantic review, and human approval before merge.
+
+#### Double-Gate Safety Design
+
+Real (non-dry-run) delegation requires **BOTH** gates to be open:
+
+1. **Gate 1: Mode is L2** — The effective mode for the specific loop must be L2 (per-loop override or global mode)
+2. **Gate 2: allowLiveDelegation = true** — An explicit opt-in flag in `.loop/config.json` must be set to `true`
+
+Even when both gates are open, the adapter itself defaults to dry-run unless explicitly configured otherwise. This creates three independent safeguards against accidental live delegation.
+
+#### Configuration
+
+**Per-loop mode overrides:**
+
+```json
+{
+  "mode": "L1",
+  "allowLiveDelegation": false,
+  "loops": {
+    "issueIntake": { "mode": "L1" },
+    "ciSweeper": { "mode": "L2" },
+    "prBabysitter": { "mode": "L1" }
+  }
+}
+```
+
+In the example above:
+- Global default is L1
+- `issueIntake` is explicitly L1 (no delegation)
+- `ciSweeper` is L2 (eligible for delegation IF second gate is also open)
+- `prBabysitter` is explicitly L1 (no delegation)
+- **But** `allowLiveDelegation: false` means all loops remain dry-run regardless
+
+**Default behavior:**
+All loops default to L1 mode. `allowLiveDelegation` defaults to `false`. This ensures **no behavior change** from Phase 5 unless both gates are explicitly opened.
+
+#### L2 Eligibility Criteria
+
+For a proposal to be eligible for L2 delegation, ALL of the following must be true:
+
+1. **Effective mode is L2** for that specific loop
+2. **Proposal outcome is `actionable`** (not `no-op`, `malformed`, etc.)
+3. **Category is in the safe allowlist:**
+   - `lint-fix` — ESLint/Prettier fixes
+   - `type-fix` — TypeScript type errors
+   - `mechanical-ci-fix` — Deterministic build/CI failures
+   - `deterministic-test-fix` — Reproducible unit test failures
+
+4. **Human-required categories are NEVER delegated**, even in L2:
+   - `security`, `auth`, `dependency`, `infrastructure`
+   - `P0`, `P1` (critical/high priority)
+   - `breaking-change`, `architecture`, `ambiguous`
+
+5. **Proposal has clear `doneWhen` conditions** (non-empty array)
+6. **No protected paths are touched:**
+   - `.env*`, secrets, credentials, keys
+   - `.github/workflows/**`, `.github/hooks/**`, `.loop/**`
+   - `package.json`, `package-lock.json`
+   - `src/lib/auth.js`, auth/session code, migrations
+
+7. **Budget limits are satisfied:**
+   - Attempts < `policy.maxAttempts` (default: 3)
+   - Changed files ≤ `policy.maxChangedFiles` (default: 5)
+   - Open loop PRs < `policy.maxConcurrentPRs` (default: 2)
+   - Active delegations < `policy.maxConcurrentDelegations` (default: 1)
+
+**Fail-closed:** If any condition is ambiguous, missing, or cannot be verified, the proposal is **NOT** eligible for L2 delegation.
+
+#### CLI Reporting
+
+The `loop run` command shows graduation eligibility in dry-run output:
+
+```bash
+npm run loop -- run --pattern ciSweeper --dry-run true
+```
+
+Output includes:
+```
+=== L2 Graduation Check ===
+Eligible for L2 delegation: YES
+Effective mode: L2
+Reason: All eligibility criteria satisfied
+
+Double-gate status:
+  1. Mode is L2: ✓
+  2. allowLiveDelegation: ✗
+
+Real delegation BLOCKED: config.allowLiveDelegation is false
+Delegation would run in dry-run mode (safe)
+```
+
+#### NEEDS_LIVE_VERIFICATION Caveat
+
+**CRITICAL:** The actual GitHub API shape for assigning the GitHub Copilot coding agent to an issue is **UNVERIFIED**.
+
+The current implementation uses a best-effort REST API call:
+```http
+PATCH /repos/{owner}/{repo}/issues/{issue_number}
+{ "assignees": ["copilot"] }
+```
+
+However, the correct shape may require:
+- A different assignee username (e.g., `github-copilot[bot]`, `copilot-agent`, etc.)
+- GraphQL mutation `replaceActorsForAssignable` instead of REST
+- Additional authentication or scoping for Copilot-specific operations
+
+**DO NOT enable both gates (`mode: L2` + `allowLiveDelegation: true`) without first manually verifying the GitHub API call against a live repository.** Even with both gates open, the adapter defaults to dry-run to prevent accidental misconfigured calls.
+
+#### Implementation Files
+
+- **`scripts/loop/core/graduation.mjs`** — Pure functions for L2 eligibility checks
+- **`scripts/loop/core/config.mjs`** — Per-loop mode resolution (`getEffectiveMode`, `allowsLiveDelegation`)
+- **`scripts/loop/delegates/github-copilot.mjs`** — Double-gate enforcement in adapter
+- **`scripts/loop/cli.mjs`** — Graduation reporting in `run` command
+- **`.loop/config.json`** — Per-loop mode overrides and `allowLiveDelegation` flag
+- **`.loop/schemas/config.schema.json`** — Extended schema with `loops` and `allowLiveDelegation`
+- **`.loop/fixtures/graduation-*.json`** — Test scenarios for graduation logic
+- **`tests/unit/loop/graduation.test.mjs`** — Comprehensive graduation tests
+- **`tests/unit/loop/config-graduation.test.mjs`** — Per-loop mode resolution tests
+
+#### Rollback
+
+If L2 delegation causes unexpected behavior:
+
+1. Set `allowLiveDelegation: false` in `.loop/config.json` (immediate dry-run enforcement)
+2. Or set specific loop modes back to L1:
+   ```json
+   "loops": {
+     "ciSweeper": { "mode": "L1" }
+   }
+   ```
+3. Or set global `mode: "L1"` to revert all loops to report-only
+4. Commit and push — no workflow changes required
+
+The double-gate design ensures you can disable L2 delegation at the config level without touching workflows, agents, or policies.
+
+#### Verification Commands
+
+```bash
+npm run test:unit    # Should pass (360+ tests)
+npm run lint         # Should pass
+npm run typecheck    # Should pass
+npm run build        # Should pass
+npm run verify       # All of the above
+```
+
+
 
 - Project-specific skills (issue triage, CI triage, minimal fix, verification)
 - Custom agents (implementer, verifier)

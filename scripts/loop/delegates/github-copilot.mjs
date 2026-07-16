@@ -1,6 +1,19 @@
 /**
  * GitHub Copilot delegation adapter
- * Dry-run is the DEFAULT; real delegation requires explicit opt-in
+ * 
+ * DOUBLE-GATE SAFETY:
+ * Real (non-dry-run) delegation requires BOTH gates:
+ * 1. Effective mode is L2 for the loop (graduation.mjs checks this)
+ * 2. config.allowLiveDelegation === true (explicit opt-in)
+ * 
+ * NEEDS_LIVE_VERIFICATION:
+ * The actual GitHub API shape for assigning the Copilot coding agent to an issue
+ * is UNVERIFIED. Current implementation uses best-effort REST PATCH with
+ * assignees:["copilot"], but may actually require GraphQL `replaceActorsForAssignable`
+ * mutation. DO NOT enable live delegation without manual GitHub API verification.
+ * 
+ * Even when both gates are set, this adapter defaults to dry-run unless explicitly
+ * overridden. This creates a third safeguard against accidental live calls.
  */
 
 import { DelegationAdapter, validateCloudBranchIsolation, createCloudBranchIsolation } from './index.mjs'
@@ -11,9 +24,10 @@ export class GitHubCopilotAdapter extends DelegationAdapter {
    * @param {object} options.connector - GitHubConnector instance
    * @param {string} options.owner - Repository owner
    * @param {string} options.repo - Repository name
-   * @param {boolean} [options.dryRun=true] - Dry-run mode (default: true)
+   * @param {boolean} [options.dryRun=true] - Dry-run mode (default: true, EXPLICIT false required for live calls)
+   * @param {boolean} [options.allowLiveDelegation=false] - Second gate: explicit live delegation opt-in
    */
-  constructor({ connector, owner, repo, dryRun = true }) {
+  constructor({ connector, owner, repo, dryRun = true, allowLiveDelegation = false }) {
     super('github-copilot')
     
     if (!connector) {
@@ -26,7 +40,11 @@ export class GitHubCopilotAdapter extends DelegationAdapter {
     this.connector = connector
     this.owner = owner
     this.repo = repo
-    this.dryRun = dryRun
+    
+    // Double-gate enforcement:
+    // Even if dryRun is false, require explicit allowLiveDelegation
+    this.dryRun = dryRun || !allowLiveDelegation
+    this.allowLiveDelegation = allowLiveDelegation
   }
 
   /**
@@ -63,6 +81,10 @@ export class GitHubCopilotAdapter extends DelegationAdapter {
 
     // Dry-run mode: return complete payload for human review
     if (this.dryRun) {
+      const reason = !this.allowLiveDelegation 
+        ? 'Live delegation not allowed (config.allowLiveDelegation is false)'
+        : 'Dry-run mode enabled'
+      
       return {
         success: true,
         status: 'dry-run',
@@ -72,12 +94,15 @@ export class GitHubCopilotAdapter extends DelegationAdapter {
         metadata: {
           adapter: this.name,
           dryRun: true,
+          allowLiveDelegation: this.allowLiveDelegation,
+          reason,
           timestamp: new Date().toISOString(),
         },
       }
     }
 
     // Real delegation mode: assign Copilot to the issue
+    // REQUIRES: dryRun=false AND allowLiveDelegation=true
     try {
       // Attempt to assign Copilot to the issue
       // NEEDS_LIVE_VERIFICATION: The exact API shape and bot login may vary

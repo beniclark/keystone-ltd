@@ -34,14 +34,25 @@ describe('GitHubCopilotAdapter', () => {
       expect(adapter.dryRun).toBe(true)
     })
 
-    it('should accept explicit dry-run setting', () => {
-      const adapter = new GitHubCopilotAdapter({
+    it('should accept explicit dry-run setting but require allowLiveDelegation', () => {
+      // Phase 6: dryRun=false ALONE is not enough — needs allowLiveDelegation too
+      const adapter1 = new GitHubCopilotAdapter({
         connector: mockConnector,
         owner: 'owner',
         repo: 'repo',
         dryRun: false,
+        allowLiveDelegation: false, // Second gate closed
       })
-      expect(adapter.dryRun).toBe(false)
+      expect(adapter1.dryRun).toBe(true) // Double-gate enforced: stays dry-run
+      
+      const adapter2 = new GitHubCopilotAdapter({
+        connector: mockConnector,
+        owner: 'owner',
+        repo: 'repo',
+        dryRun: false,
+        allowLiveDelegation: true, // Both gates open
+      })
+      expect(adapter2.dryRun).toBe(false) // Real delegation allowed
     })
   })
 
@@ -196,11 +207,13 @@ describe('GitHubCopilotAdapter', () => {
 
   describe('delegate - real mode', () => {
     beforeEach(() => {
+      // Phase 6: Real delegation requires BOTH dryRun=false AND allowLiveDelegation=true
       adapter = new GitHubCopilotAdapter({
         connector: mockConnector,
         owner: 'owner',
         repo: 'repo',
         dryRun: false,
+        allowLiveDelegation: true, // Second gate open
       })
     })
 

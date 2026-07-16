@@ -1,0 +1,23 @@
+{
+  "description": "Safe lint-fix proposal eligible for L2 (mode=L2, category=lint-fix, no protected paths, budget OK)",
+  "loopName": "ciSweeper",
+  "proposal": {
+    "outcome": "actionable",
+    "category": "lint-fix",
+    "objective": "Fix ESLint no-unused-vars in components/Header.jsx",
+    "doneWhen": [
+      "npm run lint passes with no errors",
+      "Changed files <= 1"
+    ],
+    "changedFiles": [
+      "src/components/Header.jsx"
+    ]
+  },
+  "currentState": {
+    "attempts": 0,
+    "openLoopPRs": 0,
+    "activeDelegations": 0
+  },
+  "expectedEligible": true,
+  "expectedReason": "All eligibility criteria satisfied"
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "../schemas/config.schema.json",
+  "schemaVersion": "1.0.0",
+  "mode": "L2",
+  "allowLiveDelegation": false,
+  "loops": {
+    "issueIntake": {
+      "mode": "L1"
+    },
+    "ciSweeper": {
+      "mode": "L2"
+    },
+    "prBabysitter": {
+      "mode": "L1"
+    }
+  },
+  "watchedBranches": [
+    "main"
+  ],
+  "cadence": {
+    "issueReconciliation": "0 9 * * 1-5",
+    "prReconciliation": "0 * * * *",
+    "ciReconciliation": "disabled"
+  },
+  "labels": {
+    "state": "loop:state",
+    "paused": "loop:paused",
+    "managed": "loop:managed",
+    "queued": "loop:queued",
+    "running": "loop:running",
+    "blocked": "loop:blocked",
+    "humanRequired": "loop:human-required",
+    "verified": "loop:verified",
+    "priorities": {
+      "critical": "P0: critical",
+      "high": "P1: high",
+      "medium": "P2: medium",
+      "low": "P3: low"
+    }
+  },
+  "adapter": {
+    "backend": "github-copilot",
+    "dryRun": true
+  },
+  "actionCaps": {
+    "issueIntake": {
+      "maxLabelsPerRun": 10,
+      "maxCommentsPerRun": 5,
+      "allowAutoClose": false
+    },
+    "ciSweeper": {
+      "maxFixIssuesPerRun": 3,
+      "maxAssignmentsPerRun": 2
+    },
+    "prBabysitter": {
+      "maxLabelsPerRun": 10,
+      "maxCommentsPerRun": 3,
+      "allowAutoRebase": false,
+      "allowAutoMerge": false
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "description": "Safe proposal but touches protected path (not eligible)",
+  "loopName": "ciSweeper",
+  "proposal": {
+    "outcome": "actionable",
+    "category": "lint-fix",
+    "objective": "Fix lint issues",
+    "doneWhen": [
+      "npm run lint passes"
+    ],
+    "changedFiles": [
+      "src/lib/auth.js",
+      "src/components/Button.jsx"
+    ]
+  },
+  "currentState": {
+    "attempts": 0,
+    "openLoopPRs": 0,
+    "activeDelegations": 0
+  },
+  "expectedEligible": false,
+  "expectedReason": "Proposal touches protected paths"
+}
