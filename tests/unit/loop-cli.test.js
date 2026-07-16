@@ -80,6 +80,33 @@ describe('CLI argument parsing', () => {
     expect(result.dryRun).toBe(false)
   })
 
+  it('does not swallow the next flag as --dry-run value when no value given', () => {
+    // Regression test: --dry-run followed by another flag (not true/false/1/0)
+    // must not consume that flag as its own value.
+    const result = parseArgs([
+      'node',
+      'cli.mjs',
+      'run',
+      '--pattern',
+      'issue-intake',
+      '--dry-run',
+      '--fixture',
+      '.loop/fixtures/issue-opened.json',
+    ])
+    expect(result.dryRun).toBe(true)
+    expect(result.fixture).toBe('.loop/fixtures/issue-opened.json')
+  })
+
+  it('parses --fixture flag', () => {
+    const result = parseArgs(['node', 'cli.mjs', 'run', '--fixture', '.loop/fixtures/issue-opened.json'])
+    expect(result.fixture).toBe('.loop/fixtures/issue-opened.json')
+  })
+
+  it('defaults fixture to null', () => {
+    const result = parseArgs(['node', 'cli.mjs', 'run'])
+    expect(result.fixture).toBe(null)
+  })
+
   it('lowercases mode for consistency', () => {
     const result = parseArgs(['node', 'cli.mjs', 'run', '--mode', 'L2'])
     expect(result.mode).toBe('l2')

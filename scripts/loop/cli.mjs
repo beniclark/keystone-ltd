@@ -26,6 +26,7 @@ export function parseArgs(argv) {
     dryRun: true,
     source: null,
     apply: false,
+    fixture: null,
   }
 
   for (let i = 3; i < argv.length; i++) {
@@ -38,7 +39,7 @@ export function parseArgs(argv) {
     } else if (arg === '--mode' && next) {
       args.mode = next.toLowerCase()
       i++
-    } else if (arg === '--dry-run' && next) {
+    } else if (arg === '--dry-run' && (next === 'true' || next === 'false' || next === '1' || next === '0')) {
       args.dryRun = next === 'true' || next === '1'
       i++
     } else if (arg === '--dry-run') {
@@ -48,6 +49,9 @@ export function parseArgs(argv) {
       args.dryRun = false
     } else if (arg === '--source' && next) {
       args.source = next
+      i++
+    } else if (arg === '--fixture' && next) {
+      args.fixture = next
       i++
     }
   }
@@ -229,11 +233,11 @@ async function dryRun(args) {
  * Run command - execute loop automation
  */
 async function run(args) {
-  const { pattern, mode, dryRun, source } = args
+  const { pattern, mode, dryRun, source, fixture } = args
 
   if (!pattern) {
     console.error('Error: --pattern is required')
-    console.error('Usage: run --pattern <name> --mode <l1|l2> --dry-run <true|false> --source <ref>')
+    console.error('Usage: run --pattern <name> --mode <l1|l2> --dry-run <true|false> --source <ref> [--fixture <path>]')
     process.exit(1)
   }
 
@@ -271,17 +275,45 @@ async function run(args) {
     process.exit(0)
   }
 
-  // If pattern module has a `run` export, call it
-  if (typeof patternModule.run === 'function') {
+  // Build the pattern input. Local/manual testing loads a JSON fixture via --fixture;
+  // live workflow runs currently only pass --source (a ref), since fetching the live
+  // issue/PR/workflow-run payload via GitHubConnector is NEEDS_LIVE_VERIFICATION and
+  // not yet wired here (see LOOP.md Phase 3/5 caveats).
+  let input = null
+  if (fixture) {
     try {
-      const result = await patternModule.run({
-        config,
-        policy,
-        mode,
-        dryRun,
-        source,
-        repoRoot,
-      })
+      const fixturePath = resolve(repoRoot, fixture)
+      input = JSON.parse(await readFile(fixturePath, 'utf-8'))
+      console.log(`✓ Loaded fixture input: ${fixture}`)
+    } catch (err) {
+      console.error(`Fatal: Failed to load fixture ${fixture}:`, err.message)
+      process.exit(1)
+    }
+
+    // Normalize raw GitHub webhook payload shape (snake_case) to the
+    // camelCase keys pattern modules expect. Real webhook events arrive
+    // in this same snake_case shape, so this normalization will also be
+    // needed once live event payloads are wired in (NEEDS_LIVE_VERIFICATION).
+    if (input && input.workflow_run && !input.workflowRun) {
+      input.workflowRun = input.workflow_run
+    }
+    if (input && input.pull_request && !input.pullRequest) {
+      input.pullRequest = input.pull_request
+    }
+  }
+
+  if (!input) {
+    console.log()
+    console.log('No --fixture provided and live GitHub payload fetching for --source is not yet wired.')
+    console.log('Exiting before any evaluation (L1 no-change rule). Use --fixture <path> to test locally, e.g.:')
+    console.log('  node scripts/loop/cli.mjs run --pattern issue-intake --fixture .loop/fixtures/issue-opened.json')
+    process.exit(0)
+  }
+
+  // If pattern module has an `evaluate` export, call it
+  if (typeof patternModule.evaluate === 'function') {
+    try {
+      const result = patternModule.evaluate(input, config, policy)
 
       console.log('\n=== Run Result ===')
       console.log(JSON.stringify(result, null, 2))
@@ -333,7 +365,7 @@ async function run(args) {
       process.exit(1)
     }
   } else {
-    console.log('Pattern module loaded but no `run` export found.')
+    console.log('Pattern module loaded but no `evaluate` export found.')
     console.log('This is expected during concurrent development.')
   }
 }
@@ -375,6 +407,7 @@ function help() {
   console.log('    --mode <l1|l2>      Loop mode (default: l1)')
   console.log('    --dry-run <bool>    Dry-run mode (default: true)')
   console.log('    --source <ref>      Source reference (issue/PR/run ID)')
+  console.log('    --fixture <path>    Load a JSON fixture as pattern input (for local testing)')
   console.log('  pause               Pause loop automation (sets loop:paused label)')
   console.log('  resume              Resume loop automation (clears loop:paused label)')
   console.log('  help                Show this help message')
@@ -393,6 +426,18 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
       case 'bootstrap':
         await bootstrap()
         break
+      case 'dry-run':
+        await dryRun(args)
+        break
+      case 'run':
+        await run(args)
+        break
+      case 'pause':
+        await pause()
+        break
+      case 'resume':
+        await resume()
+        break
       case 'graduate':
         await graduate(args.source)
         break
@@ -406,12 +451,12 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
         await worktreeCleanup(args)
         break
       case 'help':
-        printHelp()
+        help()
         process.exit(0)
         break
       default:
         console.error(`Unknown command: ${args.command}`)
-        printHelp()
+        help()
         process.exit(1)
     }
   } catch (err) {
