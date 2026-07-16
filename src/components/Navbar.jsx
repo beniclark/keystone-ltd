@@ -9,6 +9,7 @@ import { logout } from '../lib/auth.js'
 const navItems = [
   { to: '/services', label: 'Services' },
   { to: '/about', label: 'About' },
+  { to: '/options', label: 'Options' },
 ]
 
 export default function Navbar() {

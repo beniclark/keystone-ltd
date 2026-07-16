@@ -1,0 +1,22 @@
+{
+  "description": "Safe proposal but budget exhausted (attempts >= maxAttempts)",
+  "loopName": "ciSweeper",
+  "proposal": {
+    "outcome": "actionable",
+    "category": "type-fix",
+    "objective": "Fix TypeScript errors in components",
+    "doneWhen": [
+      "npm run typecheck passes"
+    ],
+    "changedFiles": [
+      "src/components/Button.jsx"
+    ]
+  },
+  "currentState": {
+    "attempts": 3,
+    "openLoopPRs": 0,
+    "activeDelegations": 0
+  },
+  "expectedEligible": false,
+  "expectedReason": "Max attempts exceeded (3/3)"
+}

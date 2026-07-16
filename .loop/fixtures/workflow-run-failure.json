@@ -1,0 +1,27 @@
+{
+  "workflow_run": {
+    "id": 1234567890,
+    "name": "CI",
+    "head_branch": "feature/options-chain",
+    "head_sha": "abc123def456",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/beniclark/keystone-ltd/actions/runs/1234567890",
+    "created_at": "2026-07-15T14:30:00Z",
+    "updated_at": "2026-07-15T14:35:00Z",
+    "event": "pull_request",
+    "pull_requests": [
+      {
+        "number": 124,
+        "url": "https://api.github.com/repos/beniclark/keystone-ltd/pulls/124",
+        "html_url": "https://github.com/beniclark/keystone-ltd/pull/124"
+      }
+    ]
+  },
+  "repository": {
+    "name": "keystone-ltd",
+    "owner": {
+      "login": "beniclark"
+    }
+  }
+}

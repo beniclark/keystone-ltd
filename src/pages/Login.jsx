@@ -107,7 +107,7 @@ export default function Login() {
   )
 }
 
-function InputField({ label, icon: Icon, type = 'text', value, onChange, autoFocus }) {
+function InputField({ label, icon: _Icon, type = 'text', value, onChange, autoFocus }) {
   return (
     <div>
       <label className="block text-sm font-medium text-navy-800 mb-1.5">{label}</label>

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://docs.github.com/copilot/schemas/hooks/0.0.1/preToolUse.schema.json",
+  "version": "0.0.1",
+  "hookName": "loop-policy",
+  "description": "Deterministic policy enforcement for loop-delegated work. Denies edits to protected paths, destructive Git commands, and governance self-modification.",
+  "trigger": {
+    "type": "preToolUse"
+  },
+  "handler": {
+    "type": "script",
+    "script": "../../scripts/loop/hooks/pre-tool-policy.mjs"
+  },
+  "metadata": {
+    "policyFile": "../../.loop/policy.json",
+    "enforcementLevel": "deny",
+    "failClosed": true
+  }
+}

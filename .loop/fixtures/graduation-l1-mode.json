@@ -1,0 +1,22 @@
+{
+  "description": "Safe proposal but mode=L1 (not eligible)",
+  "loopName": "issueIntake",
+  "proposal": {
+    "outcome": "actionable",
+    "category": "lint-fix",
+    "objective": "Fix ESLint issues in utils",
+    "doneWhen": [
+      "npm run lint passes"
+    ],
+    "changedFiles": [
+      "src/lib/utils.js"
+    ]
+  },
+  "currentState": {
+    "attempts": 0,
+    "openLoopPRs": 0,
+    "activeDelegations": 0
+  },
+  "expectedEligible": false,
+  "expectedReason": "Mode is L1 (L2 required)"
+}

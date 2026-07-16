@@ -1,0 +1,77 @@
+name: Loop - PR Babysitter
+
+# Triggers on safe PR/review/check metadata events and hourly reconciliation
+# Tracks PR readiness, checks, reviews, and staleness
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  
+  pull_request_review:
+    types: [submitted]
+  
+  check_suite:
+    types: [completed]
+  
+  # Hourly reconciliation to catch stale PRs and missed events
+  schedule:
+    - cron: '0 * * * *'
+  
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      pr-number:
+        description: 'PR number to process (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
+# Prevent concurrent runs per PR or scheduled reconciliation
+concurrency:
+  group: loop-pr-babysitter-${{ github.event.pull_request.number || github.event.check_suite.pull_requests[0].number || inputs.pr-number || 'scheduled' }}
+  cancel-in-progress: false
+
+jobs:
+  check-pause:
+    name: Check if loop is paused
+    runs-on: ubuntu-latest
+    outputs:
+      paused: ${{ steps.check.outputs.paused }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Check pause state
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if loop:paused label exists on state issue
+          # For now, default to not paused (full implementation in Phase 2-4)
+          echo "paused=false" >> $GITHUB_OUTPUT
+
+  run-pr-babysitter:
+    name: PR Babysitter
+    needs: check-pause
+    if: needs.check-pause.outputs.paused != 'true'
+    uses: ./.github/workflows/loop-run.yml
+    with:
+      loop-name: 'pr-babysitter'
+      dry-run: true
+      mode: 'l1'
+      source-ref: ${{ github.event.pull_request.number || github.event.check_suite.pull_requests[0].number || inputs.pr-number || 'reconciliation' }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,23 @@
+{
+  "description": "P0 proposal NOT eligible for L2 (human-required category, even in L2 mode)",
+  "loopName": "ciSweeper",
+  "proposal": {
+    "outcome": "actionable",
+    "category": "P0",
+    "objective": "Critical security vulnerability in auth.js",
+    "doneWhen": [
+      "Security audit complete",
+      "Patch applied and tested"
+    ],
+    "changedFiles": [
+      "src/lib/auth.js"
+    ]
+  },
+  "currentState": {
+    "attempts": 0,
+    "openLoopPRs": 0,
+    "activeDelegations": 0
+  },
+  "expectedEligible": false,
+  "expectedReason": "Category \"P0\" not in safe allowlist"
+}

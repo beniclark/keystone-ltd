@@ -1,0 +1,22 @@
+{
+  "description": "Safe proposal but max concurrent PRs reached",
+  "loopName": "ciSweeper",
+  "proposal": {
+    "outcome": "actionable",
+    "category": "lint-fix",
+    "objective": "Fix ESLint issues",
+    "doneWhen": [
+      "npm run lint passes"
+    ],
+    "changedFiles": [
+      "src/components/Footer.jsx"
+    ]
+  },
+  "currentState": {
+    "attempts": 0,
+    "openLoopPRs": 2,
+    "activeDelegations": 0
+  },
+  "expectedEligible": false,
+  "expectedReason": "Max concurrent PRs (2/2)"
+}

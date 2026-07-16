@@ -1,0 +1,76 @@
+{
+  "$schema": "./schemas/labels.schema.json",
+  "version": "1.0.0",
+  "labels": {
+    "priority": {
+      "P0: critical": {
+        "color": "B60205",
+        "description": "Blocking release — must be resolved immediately"
+      },
+      "P1: high": {
+        "color": "D93F0B",
+        "description": "High priority — should be resolved this sprint"
+      },
+      "P2: medium": {
+        "color": "FBCA04",
+        "description": "Medium priority — should be resolved next sprint"
+      },
+      "P3: low": {
+        "color": "FEF2C0",
+        "description": "Low priority — backlog item"
+      }
+    },
+    "loop": {
+      "loop:state": {
+        "color": "1D76DB",
+        "description": "Loop state ledger — live operational state for loop engineering"
+      },
+      "loop:paused": {
+        "color": "FBCA04",
+        "description": "Loop paused — no automated actions until resumed"
+      },
+      "loop:managed": {
+        "color": "0E8A16",
+        "description": "Item managed by loop automation"
+      },
+      "loop:queued": {
+        "color": "BFD4F2",
+        "description": "Queued for loop processing"
+      },
+      "loop:running": {
+        "color": "0075CA",
+        "description": "Loop actively processing this item"
+      },
+      "loop:blocked": {
+        "color": "D93F0B",
+        "description": "Loop cannot proceed — human intervention required"
+      },
+      "loop:human-required": {
+        "color": "FF6B35",
+        "description": "Escalated to human — outside loop capabilities"
+      },
+      "loop:verified": {
+        "color": "0E8A16",
+        "description": "Independent verification passed — ready for human approval"
+      }
+    }
+  },
+  "deprecated": {
+    "priority:p0": {
+      "canonical": "P0: critical",
+      "reason": "Migrating to canonical priority label format"
+    },
+    "priority:p1": {
+      "canonical": "P1: high",
+      "reason": "Migrating to canonical priority label format"
+    },
+    "priority:p2": {
+      "canonical": "P2: medium",
+      "reason": "Migrating to canonical priority label format"
+    }
+  },
+  "migration": {
+    "note": "The deprecated mapping above exists because sync-squad-labels.yml creates priority:p* labels. Once all issues/PRs are migrated to canonical P* labels and no active workflow depends on priority:p* labels, the deprecated labels can be retired.",
+    "verificationRequired": true
+  }
+}

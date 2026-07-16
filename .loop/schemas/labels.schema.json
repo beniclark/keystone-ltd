@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://keystone-ltd.example/schemas/labels.schema.json",
+  "title": "Loop Label Map Schema",
+  "description": "Schema for versioned label map configuration — defines canonical labels, loop-owned labels, and deprecated label migrations",
+  "type": "object",
+  "required": ["version", "labels"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    "version": {
+      "type": "string",
+      "description": "Label map version (semver)",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "labels": {
+      "type": "object",
+      "description": "Canonical label definitions organized by category",
+      "required": ["priority", "loop"],
+      "properties": {
+        "priority": {
+          "type": "object",
+          "description": "Canonical priority labels",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["color", "description"],
+            "properties": {
+              "color": {
+                "type": "string",
+                "description": "Label color (6-digit hex, no #)",
+                "pattern": "^[0-9A-Fa-f]{6}$"
+              },
+              "description": {
+                "type": "string",
+                "description": "Label description",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "loop": {
+          "type": "object",
+          "description": "Loop-owned operational labels",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["color", "description"],
+            "properties": {
+              "color": {
+                "type": "string",
+                "description": "Label color (6-digit hex, no #)",
+                "pattern": "^[0-9A-Fa-f]{6}$"
+              },
+              "description": {
+                "type": "string",
+                "description": "Label description",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "deprecated": {
+      "type": "object",
+      "description": "Deprecated labels to migrate to canonical equivalents",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["canonical", "reason"],
+        "properties": {
+          "canonical": {
+            "type": "string",
+            "description": "Canonical label to migrate to",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "description": "Migration reason",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "migration": {
+      "type": "object",
+      "description": "Migration metadata and instructions",
+      "properties": {
+        "note": {
+          "type": "string",
+          "description": "Human-readable migration guidance"
+        },
+        "verificationRequired": {
+          "type": "boolean",
+          "description": "Whether human verification is required before applying migration"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
