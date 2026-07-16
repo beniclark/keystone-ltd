@@ -126,7 +126,7 @@ describe('pr-babysitter pattern', () => {
       
       expect(result.proposal.stale).toBe(true)
       expect(result.proposal.needsHuman).toBe(true)
-      expect(result.proposal.reasons).toContain(expect.stringContaining('Stale'))
+      expect(result.proposal.reasons.some(r => r.includes('Stale'))).toBe(true)
     })
   })
   
@@ -189,7 +189,7 @@ describe('pr-babysitter pattern', () => {
       expect(result.outcome).toBe('blocked')
       expect(result.proposal.state).toBe('blocked')
       expect(result.proposal.checks.failing).toBe(1)
-      expect(result.proposal.reasons).toContain(expect.stringContaining('failing'))
+      expect(result.proposal.reasons.some(r => r.includes('failing'))).toBe(true)
     })
     
     it('should report blocked when changes requested', () => {
@@ -221,7 +221,7 @@ describe('pr-babysitter pattern', () => {
       
       expect(result.outcome).toBe('blocked')
       expect(result.proposal.reviews.changesRequested).toBe(1)
-      expect(result.proposal.reasons).toContain(expect.stringContaining('Changes requested'))
+      expect(result.proposal.reasons.some(r => r.includes('Changes requested'))).toBe(true)
     })
     
     it('should report blocked with unresolved conversations', () => {
@@ -249,7 +249,7 @@ describe('pr-babysitter pattern', () => {
       const result = evaluate(input, mockConfig, mockPolicy)
       
       expect(result.proposal.conversations.unresolved).toBe(2)
-      expect(result.proposal.reasons).toContain(expect.stringContaining('unresolved conversation'))
+      expect(result.proposal.reasons.some(r => r.includes('unresolved conversation'))).toBe(true)
     })
     
     it('should report draft state separately', () => {

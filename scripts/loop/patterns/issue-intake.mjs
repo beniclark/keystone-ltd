@@ -161,21 +161,21 @@ function inferPriority(issue, labels, policy) {
     return 'P0: critical'
   }
   
-  // Security or vulnerability issues = high priority (not general auth bugs)
+  // Security or vulnerability issues = high priority
   if (content.includes('security:') || content.includes('vulnerability') || 
       title.includes('security')) {
     return 'P1: high'
   }
   
-  // Authentication/authorization system issues (not just auth in general context)
-  if (title.includes('authentication') || title.includes('authorization') ||
-      (title.includes('auth') && !title.includes('author'))) {
+  // Authentication/authorization SYSTEM issues (not bug reports with auth in context)
+  // Only treat as P1 if it's about the auth system being down/broken
+  if (title.includes('authentication system') || title.includes('authorization system') ||
+      (title.includes('auth') && (title.includes('broken') || title.includes('down')))) {
     return 'P1: high'
   }
   
-  // Bug vs feature
-  if (content.includes('bug:') || title.includes('bug:') || 
-      content.includes('error:') || content.includes('crash')) {
+  // Bug vs feature - check title first
+  if (title.includes('bug:') || title.includes('error:') || title.includes('crash:')) {
     return 'P2: medium'
   }
   

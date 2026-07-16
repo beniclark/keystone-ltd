@@ -116,8 +116,11 @@ export function evaluate(input, config, policy) {
   }
   
   // L1: never delegate, just report
-  // Flakes get their own outcome, even though they need human
-  const outcome = classification.likelyFlake ? 'flake-detected' :
+  // Outcome priority: flake-detected (for test flakes) > needs-human > actionable
+  // Test flakes get flake-detected outcome (even though needsHuman is true)
+  // Infrastructure flakes go to needs-human
+  // Everything else follows needs-human vs actionable
+  const outcome = (classification.likelyFlake && classification.type === 'test-failure') ? 'flake-detected' :
                   needsHuman ? 'needs-human' : 'actionable'
   
   return {
@@ -201,6 +204,30 @@ function classifyFailure(failure, logs) {
   const step = failure.step.toLowerCase()
   const fullLogs = logs.toLowerCase()
   
+  // Test failure - check FIRST before other error patterns
+  // because test failures can have "error" in the message
+  const hasTimeout = error.includes('timeout') || fullLogs.includes('timeout')
+  const hasNetwork = error.includes('network') || error.includes('connection') || 
+                    error.includes('econnrefused') || error.includes('econnreset') ||
+                    fullLogs.includes('econnrefused') || fullLogs.includes('econnreset')
+  const isFlake = hasTimeout || hasNetwork || fullLogs.includes('flaky')
+  
+  if (step.includes('test') || step.includes('unit') || step.includes('e2e') || 
+      step.includes('spec') || error.includes('assertion') || fullLogs.includes('test')) {
+    
+    return {
+      type: 'test-failure',
+      confidence: isFlake ? 'medium' : 'high',
+      likelyFlake: isFlake,
+      diagnosis: isFlake ? 
+        `Likely flaky test: ${failure.error}` : 
+        `Test failure: ${failure.error}`,
+      boundedObjective: isFlake ? 
+        `Investigate and stabilize flaky test (do NOT retry to go green)` :
+        `Fix failing test assertions`
+    }
+  }
+  
   // Lint/type failure
   if (step.includes('lint') || error.includes('eslint') || error.includes('prettier')) {
     return {
@@ -219,28 +246,6 @@ function classifyFailure(failure, logs) {
       likelyFlake: false,
       diagnosis: `Type checking failure: ${failure.error}`,
       boundedObjective: `Fix type errors in affected files`
-    }
-  }
-  
-  // Test failure - check for flakes FIRST
-  const hasTimeout = error.includes('timeout') || fullLogs.includes('timeout')
-  const hasNetwork = error.includes('network') || error.includes('connection') || 
-                    error.includes('econnrefused') || error.includes('econnreset')
-  const isFlake = hasTimeout || hasNetwork || fullLogs.includes('flaky')
-  
-  if (step.includes('test') || step.includes('unit') || step.includes('e2e') || 
-      error.includes('test') || error.includes('expect') || error.includes('assertion')) {
-    
-    return {
-      type: 'test-failure',
-      confidence: isFlake ? 'medium' : 'high',
-      likelyFlake: isFlake,
-      diagnosis: isFlake ? 
-        `Likely flaky test: ${failure.error}` : 
-        `Test failure: ${failure.error}`,
-      boundedObjective: isFlake ? 
-        `Investigate and stabilize flaky test (do NOT retry to go green)` :
-        `Fix failing test assertions`
     }
   }
   
@@ -270,7 +275,8 @@ function classifyFailure(failure, logs) {
   
   // Infrastructure issues
   const hasInfraKeywords = error.includes('runner') || error.includes('github actions') || 
-                          error.includes('workflow') || fullLogs.includes('runner')
+                          error.includes('workflow') || fullLogs.includes('runner') ||
+                          error.includes('disconnected') || fullLogs.includes('disconnected')
   
   if (hasInfraKeywords || (hasNetwork && !step.includes('test'))) {
     return {
@@ -296,18 +302,18 @@ function classifyFailure(failure, logs) {
  * Determine if failure should be escalated to human
  */
 function shouldEscalateToHuman(classification, failure, policy, priorState) {
-  // Always escalate these types
+  // Always escalate these types (regardless of flake status)
   const humanRequiredTypes = [
     'permission-failure',
-    'infrastructure-failure'
+    'infrastructure-failure'  // Infrastructure is always human-required
   ]
   
   if (humanRequiredTypes.includes(classification.type)) {
     return true
   }
   
-  // Escalate flakes (never auto-retry just to go green)
-  if (classification.likelyFlake) {
+  // Escalate test flakes (but not infrastructure flakes, handled above)
+  if (classification.likelyFlake && classification.type === 'test-failure') {
     return true
   }
   
