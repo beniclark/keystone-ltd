@@ -10,6 +10,35 @@
 
 ## Learnings
 
+### Phase 5 — Workflow/CLI Wiring (2026-07-16)
+
+**Context:** Implemented the workflow orchestration and CLI interface for Phase 5 (L1 report-only mode) while Rusty concurrently worked on pattern module implementations in the same working tree.
+
+**Key decisions:**
+- Used `workflow_call` for loop-run.yml to share checkout/policy/state/dry-run logic across all three loop workflows
+- CI sweeper uses exact workflow name match ("CI") not wildcards, and filters on conclusion via early-exit step (workflow_run trigger can't filter conclusion directly)
+- Issue intake uses conservative weekday reconciliation (9 AM UTC Mon-Fri), PR babysitter uses hourly
+- All actions pinned to commit SHAs (actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af)
+- CLI uses conditional execution block (`if (import.meta.url === ...)`) to allow importing parseArgs in tests without running main logic
+- Removed shebang from cli.mjs body to avoid Vitest parse errors; Node can still execute it directly via `node scripts/loop/cli.mjs`
+
+**Technical notes:**
+- js-yaml requires `import * as yaml` not `import yaml` in ESM
+- Git worktree manager, config.mjs, and policy.mjs are already implemented (Phase 2-4) and work correctly
+- CLI defensively imports pattern modules with try/catch so it doesn't crash if Rusty's modules are incomplete during concurrent development
+- Pattern test failures (issue-intake, ci-sweeper) are expected — those belong to Rusty's concurrent work
+
+**Verification:**
+- All 4 YAML files validated successfully with js-yaml
+- 16 CLI arg-parsing tests + 9 doctor tests passing
+- lint, build, and my unit tests pass
+- Rusty's pattern tests fail as expected (not my scope)
+
+**Recommended next steps:**
+- Once Rusty's pattern modules are complete, the CLI `run` command will execute them
+- Integration testing of full loop lifecycle (trigger -> workflow -> CLI -> pattern -> state update)
+- Enable workflows after Phase 5 acceptance criteria are met
+
 ### Phase 4 — Skills, Agents, and Deterministic Hooks (2026-07-16)
 
 **What I Did:**
