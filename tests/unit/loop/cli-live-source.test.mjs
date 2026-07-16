@@ -22,56 +22,54 @@ describe('CLI live source fetching', () => {
   })
 
   describe('normalizeGitHubPayload', () => {
-    it('should convert snake_case to camelCase', () => {
+    it('converts top-level workflow_run key to workflowRun, leaving nested fields untouched', () => {
       const input = {
         workflow_run: { id: 1, head_sha: 'abc123' },
-        pull_request: { number: 42, created_at: '2026-01-01' }
       }
-      
+
       const result = normalizeGitHubPayload(input)
-      
-      expect(result).toEqual({
-        workflowRun: { id: 1, headSha: 'abc123' },
-        pullRequest: { number: 42, createdAt: '2026-01-01' }
-      })
+
+      expect(result.workflowRun).toEqual({ id: 1, head_sha: 'abc123' })
+      expect(result.workflow_run).toEqual({ id: 1, head_sha: 'abc123' })
     })
 
-    it('should handle nested objects', () => {
+    it('converts top-level pull_request key to pullRequest, leaving nested fields untouched', () => {
       const input = {
-        top_level: {
-          nested_field: {
-            deep_value: 'test'
-          }
-        }
+        pull_request: { number: 42, created_at: '2026-01-01' },
       }
-      
+
       const result = normalizeGitHubPayload(input)
-      
-      expect(result).toEqual({
-        topLevel: {
-          nestedField: {
-            deepValue: 'test'
-          }
-        }
-      })
+
+      expect(result.pullRequest).toEqual({ number: 42, created_at: '2026-01-01' })
     })
 
-    it('should handle arrays', () => {
+    it('does not recurse into nested objects (pattern modules read raw GitHub field names)', () => {
       const input = {
-        check_runs: [
-          { id: 1, head_sha: 'abc' },
-          { id: 2, head_sha: 'def' }
-        ]
+        issue: {
+          number: 123,
+          updated_at: '2026-01-01T00:00:00Z',
+          html_url: 'https://github.com/o/r/issues/123',
+        },
       }
-      
+
       const result = normalizeGitHubPayload(input)
-      
-      expect(result).toEqual({
-        checkRuns: [
-          { id: 1, headSha: 'abc' },
-          { id: 2, headSha: 'def' }
-        ]
-      })
+
+      // Nested `issue` object must keep raw snake_case fields, since
+      // issue-intake.mjs reads issue.updated_at / issue.html_url directly.
+      expect(result.issue.updated_at).toBe('2026-01-01T00:00:00Z')
+      expect(result.issue.html_url).toBe('https://github.com/o/r/issues/123')
+      expect(result.issue.updatedAt).toBeUndefined()
+    })
+
+    it('leaves already-camelCase top-level keys unchanged', () => {
+      const input = {
+        workflowRun: { id: 1 },
+        pullRequest: { number: 42 },
+      }
+
+      const result = normalizeGitHubPayload(input)
+
+      expect(result).toEqual(input)
     })
 
     it('should handle null and undefined', () => {

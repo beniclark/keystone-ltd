@@ -245,21 +245,25 @@ function getRepoInfo() {
 }
 
 /**
- * Normalize snake_case GitHub API response to camelCase for pattern modules
- * @param {object} obj - Raw GitHub API response
- * @returns {object} - Normalized object
+ * Normalize top-level GitHub webhook/REST wrapper keys to the camelCase
+ * keys pattern modules expect (e.g. workflow_run -> workflowRun,
+ * pull_request -> pullRequest). Intentionally shallow: nested objects
+ * (issue, pullRequest.head, etc.) keep their raw GitHub field names
+ * (e.g. issue.updated_at, issue.html_url) since pattern modules read
+ * those directly in their original GitHub API shape.
+ * @param {object} input - Raw fixture or API payload
+ * @returns {object} - Input with top-level wrapper keys normalized
  */
-function normalizeGitHubPayload(obj) {
-  if (!obj || typeof obj !== 'object') return obj
-  
-  const normalized = Array.isArray(obj) ? [] : {}
-  
-  for (const [key, value] of Object.entries(obj)) {
-    // Convert snake_case to camelCase
-    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
-    normalized[camelKey] = normalizeGitHubPayload(value)
+function normalizeGitHubPayload(input) {
+  if (!input || typeof input !== 'object') return input
+
+  const normalized = { ...input }
+  if (normalized.workflow_run && !normalized.workflowRun) {
+    normalized.workflowRun = normalized.workflow_run
   }
-  
+  if (normalized.pull_request && !normalized.pullRequest) {
+    normalized.pullRequest = normalized.pull_request
+  }
   return normalized
 }
 
