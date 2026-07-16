@@ -236,6 +236,17 @@ export class GitHubConnector {
     return `${this.baseUrl}/repos/${owner}/${repo}/actions/runs/${runId}/logs`
   }
 
+  /**
+   * Get workflow run jobs
+   * @param {string} owner
+   * @param {string} repo
+   * @param {number} runId
+   * @returns {Promise<object>} - Response with { total_count, jobs: [...] }
+   */
+  async getWorkflowRunJobs(owner, repo, runId) {
+    return this._request(`/repos/${owner}/${repo}/actions/runs/${runId}/jobs`)
+  }
+
   // ============================================================================
   // WRITE OPERATIONS (narrowly scoped)
   // ============================================================================

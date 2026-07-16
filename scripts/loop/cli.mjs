@@ -8,6 +8,7 @@ import { loadPolicy } from './core/policy.mjs'
 import { isEligibleForL2 } from './core/graduation.mjs'
 import { createWorktreeManager } from './isolation/worktree.mjs'
 import { main as labelsSync } from './labels-sync.mjs'
+import { GitHubConnector } from './connectors/github.mjs'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
@@ -230,6 +231,132 @@ async function dryRun(args) {
 }
 
 /**
+ * Parse repository owner and name from environment
+ * @returns {{ owner: string, repo: string }}
+ */
+function getRepoInfo() {
+  const ghRepo = process.env.GITHUB_REPOSITORY
+  if (ghRepo) {
+    const [owner, repo] = ghRepo.split('/')
+    return { owner, repo }
+  }
+  // Fallback to sensible defaults for local dev
+  return { owner: 'OWNER', repo: 'REPO' }
+}
+
+/**
+ * Normalize snake_case GitHub API response to camelCase for pattern modules
+ * @param {object} obj - Raw GitHub API response
+ * @returns {object} - Normalized object
+ */
+function normalizeGitHubPayload(obj) {
+  if (!obj || typeof obj !== 'object') return obj
+  
+  const normalized = Array.isArray(obj) ? [] : {}
+  
+  for (const [key, value] of Object.entries(obj)) {
+    // Convert snake_case to camelCase
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    normalized[camelKey] = normalizeGitHubPayload(value)
+  }
+  
+  return normalized
+}
+
+/**
+ * Build pattern input from live GitHub source
+ * @param {string} pattern - Pattern name (issue-intake, ci-sweeper, pr-babysitter)
+ * @param {string} source - Source reference (issue/PR/run ID)
+ * @param {GitHubConnector} connector - GitHub API connector
+ * @returns {Promise<object>} - Pattern input object
+ */
+async function buildInputFromSource(pattern, source, connector) {
+  const { owner, repo } = getRepoInfo()
+  
+  try {
+    switch (pattern) {
+      case 'issue-intake': {
+        const issueNumber = parseInt(source, 10)
+        if (isNaN(issueNumber)) {
+          throw new Error(`Invalid issue number: ${source}`)
+        }
+        
+        const issue = await connector.getIssue(owner, repo, issueNumber)
+        
+        // Build input matching webhook event shape
+        // Note: real webhook has action (opened/edited/reopened), but we don't
+        // have that from --source alone. Use 'reconciliation' as safe default.
+        return {
+          action: 'reconciliation',
+          issue,
+          repository: {
+            name: repo,
+            owner: { login: owner }
+          }
+        }
+      }
+      
+      case 'ci-sweeper': {
+        const runId = parseInt(source, 10)
+        if (isNaN(runId)) {
+          throw new Error(`Invalid workflow run ID: ${source}`)
+        }
+        
+        const workflowRun = await connector.getWorkflowRun(owner, repo, runId)
+        const jobsResponse = await connector.getWorkflowRunJobs(owner, repo, runId)
+        
+        // GitHub API wraps jobs in { total_count, jobs: [...] }
+        const jobs = jobsResponse.jobs || []
+        
+        // Build input matching webhook event shape
+        return {
+          workflowRun,
+          jobs,
+          logs: '', // See NEEDS_LIVE_VERIFICATION note in github.mjs
+          repository: {
+            name: repo,
+            owner: { login: owner }
+          }
+        }
+      }
+      
+      case 'pr-babysitter': {
+        const prNumber = parseInt(source, 10)
+        if (isNaN(prNumber)) {
+          throw new Error(`Invalid PR number: ${source}`)
+        }
+        
+        const pullRequest = await connector.getPullRequest(owner, repo, prNumber)
+        const reviews = await connector.listPullRequestReviews(owner, repo, prNumber)
+        const checksResponse = await connector.listCheckRunsForRef(owner, repo, pullRequest.head.sha)
+        
+        // GitHub API wraps checks in { total_count, check_runs: [...] }
+        const checks = checksResponse.check_runs || []
+        
+        // Build input matching webhook event shape
+        // Note: conversations and linkedIssue are NOT fetched (see task brief)
+        return {
+          pullRequest,
+          reviews,
+          checks,
+          conversations: [], // Known gap
+          linkedIssue: null, // Known gap
+          repository: {
+            name: repo,
+            owner: { login: owner }
+          }
+        }
+      }
+      
+      default:
+        throw new Error(`Unknown pattern: ${pattern}`)
+    }
+  } catch (err) {
+    throw new Error(`Failed to fetch live source for ${pattern}: ${err.message}`)
+  }
+}
+
+/**
  * Run command - execute loop automation
  */
 async function run(args) {
@@ -275,12 +402,12 @@ async function run(args) {
     process.exit(0)
   }
 
-  // Build the pattern input. Local/manual testing loads a JSON fixture via --fixture;
-  // live workflow runs currently only pass --source (a ref), since fetching the live
-  // issue/PR/workflow-run payload via GitHubConnector is NEEDS_LIVE_VERIFICATION and
-  // not yet wired here (see LOOP.md Phase 3/5 caveats).
+  // Build the pattern input. Two paths:
+  // 1. Fixture path (local testing): load JSON file
+  // 2. Live source path (production workflows): fetch from GitHub API
   let input = null
   if (fixture) {
+    // Path 1: Load fixture file
     try {
       const fixturePath = resolve(repoRoot, fixture)
       input = JSON.parse(await readFile(fixturePath, 'utf-8'))
@@ -290,23 +417,38 @@ async function run(args) {
       process.exit(1)
     }
 
-    // Normalize raw GitHub webhook payload shape (snake_case) to the
-    // camelCase keys pattern modules expect. Real webhook events arrive
-    // in this same snake_case shape, so this normalization will also be
-    // needed once live event payloads are wired in (NEEDS_LIVE_VERIFICATION).
-    if (input && input.workflow_run && !input.workflowRun) {
-      input.workflowRun = input.workflow_run
+    // Normalize snake_case to camelCase (fixtures may have either)
+    input = normalizeGitHubPayload(input)
+  } else if (source) {
+    // Path 2: Fetch live GitHub data
+    const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN
+    if (!token) {
+      console.error('Error: GITHUB_TOKEN or GH_TOKEN is required for live source fetching')
+      console.error('Set the token in your environment or use --fixture for local testing')
+      process.exit(0) // Graceful exit, not a crash
     }
-    if (input && input.pull_request && !input.pullRequest) {
-      input.pullRequest = input.pull_request
+
+    console.log(`Fetching live source: ${source}`)
+    const connector = new GitHubConnector()
+    
+    try {
+      const rawInput = await buildInputFromSource(pattern, source, connector)
+      // Normalize to camelCase for consistency with fixture path
+      input = normalizeGitHubPayload(rawInput)
+      console.log(`✓ Fetched live input for ${pattern}`)
+    } catch (err) {
+      console.error(`Error: ${err.message}`)
+      console.error('Live source fetch failed. Check token permissions and source reference.')
+      process.exit(0) // Graceful exit, not a crash
     }
   }
 
   if (!input) {
     console.log()
-    console.log('No --fixture provided and live GitHub payload fetching for --source is not yet wired.')
-    console.log('Exiting before any evaluation (L1 no-change rule). Use --fixture <path> to test locally, e.g.:')
-    console.log('  node scripts/loop/cli.mjs run --pattern issue-intake --fixture .loop/fixtures/issue-opened.json')
+    console.log('No --fixture or --source provided.')
+    console.log('Use --fixture <path> to test locally, or --source <ref> to fetch live GitHub data.')
+    console.log('Example (fixture): node scripts/loop/cli.mjs run --pattern issue-intake --fixture .loop/fixtures/issue-opened.json')
+    console.log('Example (source):  node scripts/loop/cli.mjs run --pattern issue-intake --source 123')
     process.exit(0)
   }
 
@@ -464,3 +606,6 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
     process.exit(1)
   }
 }
+
+// Export for testing
+export { getRepoInfo, normalizeGitHubPayload, buildInputFromSource }

@@ -291,6 +291,35 @@ describe('GitHubConnector', () => {
       const url = await connector.getWorkflowRunLogs('owner', 'repo', 123)
       expect(url).toContain('/actions/runs/123/logs')
     })
+
+    it('should get workflow run jobs', async () => {
+      const jobsResponse = {
+        total_count: 2,
+        jobs: [
+          { id: 1, name: 'lint', conclusion: 'success' },
+          { id: 2, name: 'test', conclusion: 'failure' }
+        ]
+      }
+      
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: new Map([['content-type', 'application/json']]),
+        json: async () => jobsResponse,
+      })
+
+      const result = await connector.getWorkflowRunJobs('owner', 'repo', 123)
+      
+      expect(result).toEqual(jobsResponse)
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/actions/runs/123/jobs',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'Accept': 'application/vnd.github+json',
+          }),
+        })
+      )
+    })
   })
 
   describe('write operations', () => {
